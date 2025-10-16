@@ -14,7 +14,8 @@ public static class BasketEndpoints
             })
             .WithName("GetBasket")
             .Produces<ShoppingCart>()
-            .Produces(404);
+            .Produces(404)
+            .RequireAuthorization();
 
         //POST更新购物车
         group.MapPost("/", async (ShoppingCart shoppingCart, BasketService service) =>
@@ -23,7 +24,8 @@ public static class BasketEndpoints
                 return Results.Created("GetBasket", shoppingCart);
             })
             .WithName("UpdateBasket")
-            .Produces<ShoppingCart>(201);
+            .Produces<ShoppingCart>(201)
+            .RequireAuthorization();
         
         //DELETE通过用户名删除购物车
         group.MapDelete("/{userName}", async (string userName, BasketService service) =>
@@ -32,6 +34,7 @@ public static class BasketEndpoints
                 return Results.NoContent();
             })
             .WithName("DeleteBasket")
-            .Produces(204);
+            .Produces(204)
+            .RequireAuthorization();
     }
 }
