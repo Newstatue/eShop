@@ -1,0 +1,50 @@
+@Catalog_HostAddress = https://localhost:7149/products
+
+### 获取全部产品
+GET {{Catalog_HostAddress}}/
+Accept: application/json
+
+
+### 获取指定产品
+GET {{Catalog_HostAddress}}/10
+Accept: application/json
+
+
+### 创建新产品
+POST {{Catalog_HostAddress}}/
+Content-Type: application/json
+
+{
+  "id": 10,
+  "name": "NEW Swn Flashlight",
+  "description": "A NEW swn product for outdoor enthusiasts",
+  "price": 59.99,
+  "imageUrl": "product10.png"
+}
+
+
+### 更新产品
+PUT {{Catalog_HostAddress}}/10
+Content-Type: application/json
+
+{
+  "name": "UPDATED Swn Flashlight",
+  "description": "A UPDATED swn product for outdoor enthusiasts",
+  "price": 19.99,
+  "imageUrl": "product10.png"
+}
+
+###
+PUT {{Catalog_HostAddress}}/1
+Content-Type: application/json
+
+{
+  "name": "Solar Powered Flashlight",
+  "description": "A fantastic product for outdoor enthusiasts",
+  "price": 9.99,
+  "imageUrl": "product1.png"
+}
+
+
+### 删除产品
+DELETE {{Catalog_HostAddress}}/10
