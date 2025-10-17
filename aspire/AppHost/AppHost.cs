@@ -45,4 +45,13 @@ var basket = builder
     .WaitFor(rabbitMq)
     .WaitFor(keycloak);
 
+var webapp = builder
+    .AddNpmApp("webapp", "../../frontend/webapp")
+    .WithReference(basket)
+    .WaitFor(basket)
+    .WithEnvironment("BROWSER", "none")
+    .WithHttpEndpoint(env: "VITE_PORT")
+    .WithExternalHttpEndpoints()
+    .PublishAsDockerFile();
+
 builder.Build().Run();

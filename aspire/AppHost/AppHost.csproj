@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.1" />
     <PackageReference Include="Aspire.Hosting.Keycloak" Version="9.5.1-preview.1.25502.11" />
+    <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.5.1" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.5.1" />
     <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="9.5.1" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="9.5.1" />
@@ -23,4 +24,15 @@
     <ProjectReference Include="..\..\services\Catalog\Catalog.csproj" />
   </ItemGroup>
 
+  <Target Name="RestoreNpm" BeforeTargets="Build" Condition=" '$(DesignTimeBuild)' != 'true' ">
+    <ItemGroup>
+      <PackageJsons Include="..\..\frontend\webapp\package.json" />
+    </ItemGroup>
+
+    <!-- Install npm packages if node_modules is missing -->
+    <Message Importance="Normal" Text="Installing npm packages for %(PackageJsons.RelativeDir)"
+      Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)/node_modules')" />
+    <Exec Command="npm install" WorkingDirectory="%(PackageJsons.RootDir)%(PackageJsons.Directory)"
+      Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)/node_modules')" />
+  </Target>
 </Project>
