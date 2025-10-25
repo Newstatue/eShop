@@ -5,8 +5,31 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.AddServiceDefaults();
 
-builder.AddNpgsqlDbContext<ProductDbContext>(connectionName: "catalogdb");
+// Allow requests from the frontend running on localhost:3001 during development
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontendDev", policy =>
+    {
+        policy.SetIsOriginAllowed(origin =>
+                Uri.TryCreate(origin, UriKind.Absolute, out var uri)
+                && uri.Host == "localhost")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+builder.AddOllamaApiClient("chat")
+    .AddChatClient();
+
+builder.AddOllamaApiClient("embedding")
+    .AddEmbeddingGenerator();
+
+builder.Services.AddSingleton<InMemoryVectorStore>();
+builder.Services.AddInMemoryVectorStoreRecordCollection<int, ProductVector>("products");
+
+builder.AddNpgsqlDbContext<ProductDbContext>("catalogdb");
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<ProductAIService>();
 builder.Services.AddMassTransitWithAssemblies(Assembly.GetExecutingAssembly());
 
 var app = builder.Build();
@@ -18,6 +41,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMigration();
+
+// Enable CORS policy only in Development
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("AllowFrontendDev");
+}
 
 app.MapDefaultEndpoints();
 app.MapProductEndpoints();

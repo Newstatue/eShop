@@ -27,68 +27,14 @@ public class DataSeeder
 
     public static IEnumerable<Product> Products =>
     [
-        new Product
-        {
-            Name = "Solar Powered Flashlight",
-            Description = "A fantastic product for outdoor enthusiasts",
-            Price = 19.99m,
-            ImageUrl = "product1.png"
-        },
-        new Product
-        {
-            Name = "Hiking Poles",
-            Description = "Ideal for camping and hiking trips",
-            Price = 24.99m,
-            ImageUrl = "product2.png"
-        },
-        new Product
-        {
-            Name = "Outdoor Rain Jacket",
-            Description = "This product will keep you warm and dry in all weathers",
-            Price = 49.99m,
-            ImageUrl = "product3.png"
-        },
-        new Product
-        {
-            Name = "Survival Kit",
-            Description = "A must-have for any outdoor adventurer",
-            Price = 99.99m,
-            ImageUrl = "product4.png"
-        },
-        new Product
-        {
-            Name = "Outdoor Backpack",
-            Description = "This backpack is perfect for carrying all your outdoor essentials",
-            Price = 39.99m,
-            ImageUrl = "product5.png"
-        },
-        new Product
-        {
-            Name = "Camping Cookware",
-            Description = "This cookware set is ideal for cooking outdoors",
-            Price = 29.99m,
-            ImageUrl = "product6.png"
-        },
-        new Product
-        {
-            Name = "Camping Stove",
-            Description = "This stove is perfect for cooking outdoors",
-            Price = 49.99m,
-            ImageUrl = "product7.png"
-        },
-        new Product
-        {
-            Name = "Camping Lantern",
-            Description = "This lantern is perfect for lighting up your campsite",
-            Price = 19.99m,
-            ImageUrl = "product8.png"
-        },
-        new Product
-        {
-            Name = "Camping Tent",
-            Description = "This tent is perfect for camping trips",
-            Price = 99.99m,
-            ImageUrl = "product9.png"
-        }
+        new Product { Name = "太阳能手电筒", Description = "户外爱好者的绝佳产品", Price = 19.99m, ImageUrl = "product1.png" },
+        new Product { Name = "登山杖", Description = "适合露营和徒步旅行", Price = 24.99m, ImageUrl = "product2.png" },
+        new Product { Name = "户外雨衣", Description = "让你在各种天气下保持温暖干爽", Price = 49.99m, ImageUrl = "product3.png" },
+        new Product { Name = "生存套件", Description = "任何户外探险者的必备装备", Price = 99.99m, ImageUrl = "product4.png" },
+        new Product { Name = "户外背包", Description = "完美携带所有户外必需品的背包", Price = 39.99m, ImageUrl = "product5.png" },
+        new Product { Name = "露营炊具", Description = "理想的户外烹饪炊具套装", Price = 29.99m, ImageUrl = "product6.png" },
+        new Product { Name = "露营炉", Description = "户外烹饪的完美选择", Price = 49.99m, ImageUrl = "product7.png" },
+        new Product { Name = "露营灯", Description = "照亮营地的完美灯具", Price = 19.99m, ImageUrl = "product8.png" },
+        new Product { Name = "露营帐篷", Description = "适合露营旅行的帐篷", Price = 99.99m, ImageUrl = "product9.png" }
     ];
 }

@@ -13,3 +13,11 @@ global using ServiceDefaults.Messaging;
 global using MassTransit;
 
 global using ServiceDefaults.Messaging.Events;
+
+global using Microsoft.SemanticKernel;
+global using Microsoft.Extensions.AI;
+global using Microsoft.SemanticKernel.Connectors.InMemory;
+
+global using System.Text.RegularExpressions;
+
+global using Microsoft.Extensions.VectorData;

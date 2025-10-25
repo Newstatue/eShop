@@ -36,28 +36,54 @@ public static class ProductEndpoints
 
         //PUT更新商品
         group.MapPut("/{id}", async (int id, Product inputProduct, ProductService service) =>
-        {
-            var updateProduct = await service.GetProductByIdAsync(id);
-            if (updateProduct is null) return Results.NotFound();
+            {
+                var updateProduct = await service.GetProductByIdAsync(id);
+                if (updateProduct is null) return Results.NotFound();
 
-            await service.UpdateProductAsync(updateProduct, inputProduct);
-            return Results.NoContent();
-        })
-        .WithName("UpdateProduct")
-        .Produces(204)
-        .Produces(404);
+                await service.UpdateProductAsync(updateProduct, inputProduct);
+                return Results.NoContent();
+            })
+            .WithName("UpdateProduct")
+            .Produces(204)
+            .Produces(404);
 
         //DELETE删除商品
         group.MapDelete("/{id}", async (int id, ProductService service) =>
-        {
-            var deleteProduct = await service.GetProductByIdAsync(id);
-            if (deleteProduct is null) return Results.NotFound();
+            {
+                var deleteProduct = await service.GetProductByIdAsync(id);
+                if (deleteProduct is null) return Results.NotFound();
 
-            await service.DeleteProductAsync(deleteProduct);
-            return Results.NoContent();
-        })
-        .WithName("DeleteProduct")
-        .Produces(204)
-        .Produces(404);
+                await service.DeleteProductAsync(deleteProduct);
+                return Results.NoContent();
+            })
+            .WithName("DeleteProduct")
+            .Produces(204)
+            .Produces(404);
+
+        group.MapGet("/support/{query}", async (string query, ProductAIService service) =>
+            {
+                var response = await service.SupportAsync(query);
+                return Results.Ok(response);
+            })
+            .WithName("Support")
+            .Produces(200);
+
+        //传统搜索
+        group.MapGet("search/{query}", async (string query, ProductService service) =>
+            {
+                var products = await service.SearchProductsAsync(query);
+                return Results.Ok(products);
+            })
+            .WithName("SearchProducts")
+            .Produces<List<Product>>();
+
+        //AI搜索
+        group.MapGet("aisearch/{query}", async (string query, ProductAIService service) =>
+            {
+                var products = await service.SearchProductsAsync(query);
+                return Results.Ok(products);
+            })
+            .WithName("AIProductSearch")
+            .Produces<List<Product>>();
     }
 }

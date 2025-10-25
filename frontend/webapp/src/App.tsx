@@ -1,62 +1,46 @@
-import { useEffect, useState } from "react";
-import "./App.css";
-import { Forecast } from "./models/Forecast";
+// App.tsx
+import { Outlet } from 'react-router-dom';
+import StaggeredMenu from './components/StaggeredMenu';
 
-function App() {
-  const [forecasts, setForecasts] = useState<Array<Forecast>>([]);
 
-  const requestWeather = async () => {
-    const weather = await fetch("api/weatherforecast");
-    console.log(weather);
+export default function App() {
+  const menuItems = [
+    { label: '首页', ariaLabel: '前往首页', link: '/' },
+    { label: '产品', ariaLabel: '查看我们的产品', link: '/products' },
+    { label: '关于', ariaLabel: '了解关于我们', link: '/about' },
+    { label: '联系我们', ariaLabel: '联系我们', link: '/contact' }
+  ];
 
-    const weatherJson = await weather.json();
-    console.log(weatherJson);
-
-    setForecasts(weatherJson);
-  };
-
-  useEffect(() => {
-    requestWeather();
-  }, []);
+  const socialItems = [
+    { label: 'GitHub', link: 'https://github.com' }
+  ];
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>React (Vite) Weather</h1>
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Temp. (C)</th>
-              <th>Temp. (F)</th>
-              <th>Summary</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(
-              forecasts ?? [
-                {
-                  date: "N/A",
-                  temperatureC: "",
-                  temperatureF: "",
-                  summary: "No forecasts",
-                },
-              ]
-            ).map((w) => {
-              return (
-                <tr key={w.date}>
-                  <td>{w.date}</td>
-                  <td>{w.temperatureC}</td>
-                  <td>{w.temperatureF}</td>
-                  <td>{w.summary}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </header>
-    </div>
+    <>
+      <StaggeredMenu
+        position="left"
+        items={menuItems}
+        socialItems={socialItems}
+        displaySocials={false}
+        displayItemNumbering={true}
+        menuButtonColor="#fff"
+        openMenuButtonColor="#777"
+        changeMenuColorOnOpen={true}
+        colors={['#646CFF', '#FFD62E']}
+        accentColor="#404041"
+        logoUrl="/vite.svg"
+        isFixed={true}
+        onMenuOpen={() => console.log('Menu opened')}
+        onMenuClose={() => console.log('Menu closed')}
+      />
+
+      <main style={{ padding: '2rem', minHeight: '60vh' }}>
+        <Outlet />
+      </main>
+
+      <footer style={{ padding: '2rem', background: '#333', color: '#fff' }}>
+        Footer
+      </footer>
+    </>
   );
 }
-
-export default App;

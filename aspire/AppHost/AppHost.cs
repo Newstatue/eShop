@@ -23,17 +23,35 @@ var rabbitMq = builder
     .WithLifetime(ContainerLifetime.Persistent);
 
 var keycloak = builder
-    .AddKeycloak("keycloak", 8080)
+    .AddKeycloak("keycloak")
+    .WithHttpsEndpoint(8443, 8443)
     .WithDataVolume()
     .WithLifetime(ContainerLifetime.Persistent);
+
+var ollma = builder
+    .AddOllama("ollama", 11434)
+    .WithDataVolume()
+    .WithImageTag("0.12.6")
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithOpenWebUI();
+
+var chat = ollma
+    .AddModel("chat", "qwen3:0.6b");
+
+var embedding = ollma
+    .AddModel("embedding", "qwen3-embedding:0.6b");
 
 //项目
 var catalog = builder
     .AddProject<Projects.Catalog>("catalog")
     .WithReference(catalogDb)
     .WithReference(rabbitMq)
+    .WithReference(chat)
+    .WithReference(embedding)
     .WaitFor(catalogDb)
-    .WaitFor(rabbitMq);
+    .WaitFor(rabbitMq)
+    .WaitFor(chat)
+    .WaitFor(embedding);
 
 var basket = builder
     .AddProject<Projects.Basket>("basket")
@@ -47,11 +65,13 @@ var basket = builder
 
 var webapp = builder
     .AddNpmApp("webapp", "../../frontend/webapp")
+    .WithEnvironment("BROWSER", "none")
+    .WithHttpsEndpoint(env: "VITE_PORT")
+    .WithExternalHttpEndpoints()
+    .WithReference(catalog)
     .WithReference(basket)
     .WaitFor(basket)
-    .WithEnvironment("BROWSER", "none")
-    .WithHttpEndpoint(env: "VITE_PORT")
-    .WithExternalHttpEndpoints()
+    .WaitFor(catalog)
     .PublishAsDockerFile();
 
 builder.Build().Run();

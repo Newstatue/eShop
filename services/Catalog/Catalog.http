@@ -48,3 +48,19 @@ Content-Type: application/json
 
 ### 删除产品
 DELETE {{Catalog_HostAddress}}/10
+
+
+### AI支持
+
+GET {{Catalog_HostAddress}}/support/今天天气怎么样
+Accept: application/json
+
+###传统搜索
+
+GET {{Catalog_HostAddress}}/search/雨衣
+Accept: application/json
+
+###AI搜索
+GET {{Catalog_HostAddress}}/aisearch/随机
+Accept: application/json
+
