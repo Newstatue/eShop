@@ -21,3 +21,12 @@ export async function supportProducts(query: string) {
     const response = await httpClient.get<string>(`/products/support/${query}`);
     return response.data;
 }
+
+export async function searchProducts(query: string): Promise<Product[]> {
+    const response = await httpClient.get<Product[]>(`/products/search/${query}`);
+    return response.data;
+}
+export async function aiSearchProducts(query: string): Promise<Product[]> {
+    const response = await httpClient.get<Product[]>(`/products/aisearch/${query}`);
+    return response.data;
+}

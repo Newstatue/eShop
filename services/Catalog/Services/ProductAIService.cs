@@ -33,12 +33,10 @@ public class ProductAIService(
         return content.Trim();
     }
 
-    public async Task<IEnumerable<Product>> SearchProductsAsync(string query)
+    public async Task<IEnumerable<Product>> SearchProductsAsync(string query, int topN = 5, float threshold = 0.65f)
     {
         if (!await productVectorCollection.CollectionExistsAsync())
-        {
             await InitEmbeddingsAsync();
-        }
 
         var queryEmbedding = await embeddingGenerator.GenerateAsync(query);
 
@@ -47,15 +45,26 @@ public class ProductAIService(
             VectorProperty = r => r.Vector, IncludeVectors = false
         };
 
-        int topN = 1;
+        var results = new List<VectorSearchResult<ProductVector>>();
 
-        var topResults = new List<VectorSearchResult<ProductVector>>();
         await foreach (var result in productVectorCollection.SearchAsync(queryEmbedding, topN, searchOptions))
         {
-            topResults.Add(result);
+            // 只保留相似度高于阈值的
+            if (result.Score >= threshold)
+                results.Add(result);
         }
 
-        return topResults.Select(r => new Product
+        // 如果都不满足阈值，兜底返回最相似的一个
+        if (!results.Any())
+        {
+            await foreach (var result in productVectorCollection.SearchAsync(queryEmbedding, 1, searchOptions))
+            {
+                results.Add(result);
+                break;
+            }
+        }
+
+        return results.Select(r => new Product
         {
             Id = r.Record.Id,
             Name = r.Record.Name,
