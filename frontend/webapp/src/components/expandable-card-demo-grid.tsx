@@ -55,7 +55,7 @@ export default function ExpandableCardGrid({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 h-full w-full z-10"
+            className="fixed inset-0 h-full w-full bg-background/80 backdrop-blur-sm z-10"
           />
         )}
       </AnimatePresence>
@@ -65,7 +65,7 @@ export default function ExpandableCardGrid({
             <motion.div
               layoutId={`card-${active.title}-${id}`}
               ref={ref}
-              className="relative w-full max-w-[500px]  h-full md:h-fit md:max-h-[90%]  flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden"
+              className="relative w-full max-w-[500px] h-full md:h-fit md:max-h-[90%] flex flex-col bg-card text-card-foreground sm:rounded-3xl overflow-hidden border border-border shadow-2xl"
             >
               <motion.button
                 type="button"
@@ -73,7 +73,7 @@ export default function ExpandableCardGrid({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute bottom-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-neutral-800 shadow-lg ring-1 ring-black/10 lg:hidden"
+                className="absolute bottom-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background/90 text-foreground shadow-lg ring-1 ring-border lg:hidden"
                 aria-label="关闭详情"
                 onClick={() => setActive(null)}
               >
@@ -99,7 +99,7 @@ export default function ExpandableCardGrid({
                 {active.badge ? (
                   <motion.span
                     layout
-                    className="absolute right-4 top-4 rounded-full bg-black/70 px-3 py-1 text-sm font-semibold text-white"
+                    className="absolute right-4 top-4 rounded-full bg-foreground/80 px-3 py-1 text-sm font-semibold text-background"
                   >
                     {active.badge}
                   </motion.span>
@@ -111,13 +111,13 @@ export default function ExpandableCardGrid({
                   <div className="">
                     <motion.h3
                       layoutId={`title-${active.title}-${id}`}
-                      className="font-medium text-neutral-700 dark:text-neutral-200 text-base"
+                      className="font-medium text-base text-card-foreground"
                     >
                       {active.title}
                     </motion.h3>
                     <motion.p
                       layoutId={`description-${active.description}-${id}`}
-                      className="text-neutral-600 dark:text-neutral-400 text-base"
+                      className="text-base text-muted-foreground"
                     >
                       {active.description}
                     </motion.p>
@@ -131,7 +131,7 @@ export default function ExpandableCardGrid({
                       exit={{ opacity: 0 }}
                       href={active.ctaLink}
                       target="_blank"
-                      className="px-4 py-3 text-sm rounded-full font-bold bg-green-500 text-white"
+                      className="px-4 py-3 text-sm rounded-full font-bold bg-primary text-primary-foreground shadow-md"
                     >
                       {active.ctaText}
                     </motion.a>
@@ -143,7 +143,7 @@ export default function ExpandableCardGrid({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="text-neutral-600 text-xs md:text-sm lg:text-base h-40 md:h-fit pb-10 flex flex-col items-start gap-4 overflow-auto dark:text-neutral-400 [mask:linear-gradient(to_bottom,white,white,transparent)] [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
+                    className="text-muted-foreground text-xs md:text-sm lg:text-base h-40 md:h-fit pb-10 flex flex-col items-start gap-4 overflow-auto [mask:linear-gradient(to_bottom,var(--card),var(--card),transparent)] [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
                   >
                     {typeof active.content === "function"
                       ? active.content()
@@ -161,7 +161,7 @@ export default function ExpandableCardGrid({
             layoutId={`card-${card.title}-${id}`}
             key={card.title}
             onClick={() => setActive(card)}
-            className="p-4 flex flex-col  hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-xl cursor-pointer"
+            className="p-4 flex flex-col rounded-xl cursor-pointer transition-colors bg-card text-card-foreground shadow border border-border hover:bg-muted"
           >
             <div className="flex gap-4 flex-col  w-full">
               <motion.div
@@ -185,7 +185,7 @@ export default function ExpandableCardGrid({
                 {card.badge ? (
                   <motion.span
                     layout
-                    className="absolute right-4 top-4 rounded-full bg-black/70 px-3 py-1 text-sm font-semibold text-white"
+                    className="absolute right-4 top-4 rounded-full bg-foreground/80 px-3 py-1 text-sm font-semibold text-background"
                   >
                     {card.badge}
                   </motion.span>
@@ -194,13 +194,13 @@ export default function ExpandableCardGrid({
               <div className="flex justify-center items-center flex-col">
                 <motion.h3
                   layoutId={`title-${card.title}-${id}`}
-                  className="font-medium text-neutral-800 dark:text-neutral-200 text-center md:text-left text-base"
+                  className="font-medium text-center md:text-left text-base text-card-foreground"
                 >
                   {card.title}
                 </motion.h3>
                 <motion.p
                   layoutId={`description-${card.description}-${id}`}
-                  className="text-neutral-600 dark:text-neutral-400 text-center md:text-left text-base"
+                  className="text-muted-foreground text-center md:text-left text-base"
                 >
                     {card.description}
                 </motion.p>

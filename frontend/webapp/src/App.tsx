@@ -23,22 +23,18 @@ export default function App() {
         socialItems={socialItems}
         displaySocials={false}
         displayItemNumbering={true}
-        menuButtonColor="#fff"
-        openMenuButtonColor="#777"
         changeMenuColorOnOpen={true}
-        colors={['#646CFF', '#FFD62E']}
-        accentColor="#404041"
         logoUrl="/vite.svg"
         isFixed={true}
         onMenuOpen={() => console.log('Menu opened')}
         onMenuClose={() => console.log('Menu closed')}
       />
 
-      <main style={{ padding: '2rem', minHeight: '60vh' }}>
+      <main className="min-h-[60vh] px-8 py-8 text-foreground bg-background transition-colors">
         <Outlet />
       </main>
 
-      <footer style={{ padding: '2rem', background: '#333', color: '#fff' }}>
+      <footer className="px-8 py-6 bg-secondary text-secondary-foreground transition-colors">
         Footer
       </footer>
     </>

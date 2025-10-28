@@ -46,7 +46,8 @@ var rabbitMq = builder
 var keycloak = builder
     .AddKeycloak("keycloak")
     .WithImageTag("25.0")
-    .WithDataVolume()
+    .WithBindMount("./theme", "/opt/keycloak/providers")
+    // .WithDataVolume()
     .RunWithHttpsDevCertificate()
     .WithEnvironment("KEYCLOAK_ADMIN", keycloakAdminUser)
     .WithEnvironment("KEYCLOAK_ADMIN_PASSWORD", keycloakAdminPassword)

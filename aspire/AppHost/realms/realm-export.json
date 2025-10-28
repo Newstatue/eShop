@@ -1476,6 +1476,7 @@
     "strictTransportSecurity": "${REALM_HSTS}"
   },
   "smtpServer": {},
+  "loginTheme": "keycloakify-starter",
   "eventsEnabled": false,
   "eventsListeners": [
     "jboss-logging"
@@ -1646,8 +1647,11 @@
       }
     ]
   },
-  "internationalizationEnabled": false,
-  "supportedLocales": [],
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "zh-CN"
+  ],
+  "defaultLocale": "zh-CN",
   "authenticationFlows": [
     {
       "id": "76e9e34e-c2a9-435b-aff5-7d68e17f9b80",

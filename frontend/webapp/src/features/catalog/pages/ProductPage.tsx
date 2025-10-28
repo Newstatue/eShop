@@ -33,7 +33,7 @@ export default function ProductPage() {
                 src: imageSrc || "/vite.svg",
                 fallbackSrc: "/vite.svg",
                 badge: `￥${product.price.toFixed(2)}`,
-                ctaText: "立即购买",
+                ctaText: "加入购物车",
                 ctaLink: `/products/${product.id}`,
                 content: (
                     <div className="space-y-4 text-left">
@@ -65,9 +65,7 @@ export default function ProductPage() {
             <SearchBar
                 onResults={(list) => setDisplayed(list)}
                 onClear={() => setDisplayed(products ?? [])}
-                initialMode="ai"
-                leftReserve={75}
-                rightReserve={75}
+                mode="ai"
             />
 
             <section className="relative min-h-screen overflow-hidden bg-linear-to-b from-muted/30 via-background/60 to-background pt-28 pb-10">
@@ -89,7 +87,7 @@ export default function ProductPage() {
                         </div>
                     )}
                 </div>
-                <AISupport />
+                <AISupport maxHeight="100vh" minHeight={600} />
             </section>
         </>
     );
