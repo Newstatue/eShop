@@ -2322,5 +2322,33 @@
   },
   "clientPolicies": {
     "policies": []
-  }
+  },
+  "users": [
+    {
+      "username": "${TEST_USER_USERNAME}",
+      "enabled": true,
+      "createdTimestamp": "${TEST_USER_CREATED_TIMESTAMP}",
+      "email": "${TEST_USER_EMAIL}",
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${TEST_USER_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "locale": [
+          "${TEST_USER_LOCALE}"
+        ]
+      },
+      "requiredActions": [],
+      "realmRoles": [
+        "default-roles-${REALM_NAME}"
+      ],
+      "clientRoles": {}
+    }
+  ]
 }

@@ -13,6 +13,19 @@ builder.Services.AddHttpClient<CatalogApiClient>(client =>
     client.BaseAddress = new("https+http://catalog");
 });
 
+// Allow requests from the frontend running on localhost:3001 during development
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontendDev", policy =>
+    {
+        policy.SetIsOriginAllowed(origin =>
+                Uri.TryCreate(origin, UriKind.Absolute, out var uri)
+                && uri.Host == "localhost")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddMassTransitWithAssemblies(Assembly.GetExecutingAssembly());
 
 builder.Services.AddAuthentication()
@@ -34,6 +47,13 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+// Enable CORS policy only in Development
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("AllowFrontendDev");
+}
+
 
 app.MapDefaultEndpoints();
 app.MapBasketEndpoints();

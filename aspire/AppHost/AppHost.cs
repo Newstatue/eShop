@@ -20,6 +20,13 @@ var webAppClientName = builder
 //     .AddParameter("webapp-client-secret", secret: true)
 //     .WithGeneratedDefault(new() { MinLength = 32, Special = false });
 
+var testUserUsername = builder
+    .AddParameter("test-user-username");
+var testUserEmail = builder
+    .AddParameter("test-user-email");
+var testUserPassword = builder
+    .AddParameter("test-user-password", secret: true);
+
 
 //微服务
 var postgres = builder
@@ -45,8 +52,9 @@ var rabbitMq = builder
 
 var keycloak = builder
     .AddKeycloak("keycloak")
-    .WithImageTag("25.0")
-    .WithBindMount("./theme", "/opt/keycloak/providers")
+    .WithImage("phasetwo/phasetwo-keycloak")
+    .WithImageTag("25")
+    .WithBindMount("./providers", "/opt/keycloak/providers")
     // .WithDataVolume()
     .RunWithHttpsDevCertificate()
     .WithEnvironment("KEYCLOAK_ADMIN", keycloakAdminUser)
@@ -125,5 +133,34 @@ keycloak.WithSampleRealmImport(keycloakRealmName, keycloakRealmDisplayName, [
         webApp
     )
 ]);
+keycloak
+    .WithEnvironment("TEST_USER_USERNAME", testUserUsername)
+    .WithEnvironment("TEST_USER_EMAIL", testUserEmail)
+    .WithEnvironment("TEST_USER_PASSWORD", testUserPassword)
+    .WithEnvironment("TEST_USER_LOCALE", "zh-CN")
+    .WithEnvironment("TEST_USER_CREATED_TIMESTAMP", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString());
+
+var apiPortal = builder
+    .AddProject<Projects.ApiPortal>("apiportal")
+    .WithHttpsEndpoint()
+    .WithReference(catalog)
+    .WithReference(basket)
+    .WithExternalHttpEndpoints()
+    .WaitFor(catalog)
+    .WaitFor(basket);
+
+apiPortal
+    .WithEnvironment("Keycloak__Realm", keycloakRealmName)
+    .WithEnvironment("Keycloak__ClientId", webAppClientId)
+    .WithEnvironment("Keycloak__DefaultUser__Username", testUserUsername)
+    .WithEnvironment("Keycloak__DefaultUser__Password", testUserPassword);
+
+apiPortal.WithEnvironment(context =>
+{
+    var httpsEndpoint = keycloak.GetEndpoint("https");
+    var authority = httpsEndpoint.Url;
+    context.EnvironmentVariables["Keycloak__Authority"] = authority.TrimEnd('/');
+});
+
 
 builder.Build().Run();

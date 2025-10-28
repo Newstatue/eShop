@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\services\Basket\Basket.csproj" />
     <ProjectReference Include="..\..\services\Catalog\Catalog.csproj" />
+    <ProjectReference Include="..\ApiPortal\ApiPortal.csproj" />
   </ItemGroup>
 
   <Target Name="RestoreNpm" BeforeTargets="Build" Condition=" '$(DesignTimeBuild)' != 'true' ">

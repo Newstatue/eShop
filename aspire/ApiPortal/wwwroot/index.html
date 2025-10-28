@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <title>API 测试门户</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+  <style>
+    body { margin: 0; }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+  <script>
+    window.ui = SwaggerUIBundle({
+      dom_id: '#swagger-ui',
+      urls: [
+        { url: '/openapi/keycloak.json', name: 'Keycloak API' },
+        { url: '/openapi/catalog.json', name: 'Catalog API' },
+        { url: '/openapi/basket.json', name: 'Basket API' }
+      ],
+      urlsPrimaryName: 'Keycloak API',
+      presets: [
+        SwaggerUIBundle.presets.apis,
+        SwaggerUIStandalonePreset
+      ],
+      layout: 'StandaloneLayout',
+      deepLinking: true,
+      persistAuthorization: true,
+      displayRequestDuration: true,
+      tryItOutEnabled: true,
+      validatorUrl: null
+    });
+  </script>
+</body>
+</html>
