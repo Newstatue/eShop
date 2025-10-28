@@ -28,10 +28,13 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddMassTransitWithAssemblies(Assembly.GetExecutingAssembly());
 
+var keycloakSection = builder.Configuration.GetSection("Keycloak");
+var keycloakRealm = keycloakSection.GetValue<string>("Realm") ?? "eshop";
+
 builder.Services.AddAuthentication()
     .AddKeycloakJwtBearer(
         serviceName: "keycloak",
-        realm: "eshop",
+        realm: keycloakRealm,
         configureOptions: options =>
         {
             options.RequireHttpsMetadata = false;

@@ -20,6 +20,14 @@ var webAppClientName = builder
 //     .AddParameter("webapp-client-secret", secret: true)
 //     .WithGeneratedDefault(new() { MinLength = 32, Special = false });
 
+var webApiClientId = builder
+    .AddParameter("webapi-client-id");
+var webApiClientName = builder
+    .AddParameter("webapi-client-name");
+var webApiClientSecret = builder
+    .AddParameter("webapi-client-secret", secret: true)
+    .WithGeneratedDefault(new() { MinLength = 32, Special = false });
+
 var testUserUsername = builder
     .AddParameter("test-user-username");
 var testUserEmail = builder
@@ -58,8 +66,8 @@ var keycloak = builder
     // .WithDataVolume()
     .RunWithHttpsDevCertificate()
     .WithEnvironment("KEYCLOAK_ADMIN", keycloakAdminUser)
-    .WithEnvironment("KEYCLOAK_ADMIN_PASSWORD", keycloakAdminPassword)
-    .WithLifetime(ContainerLifetime.Persistent);
+    .WithEnvironment("KEYCLOAK_ADMIN_PASSWORD", keycloakAdminPassword);
+// .WithLifetime(ContainerLifetime.Persistent);
 
 var managementHealthChecks = keycloak.Resource.Annotations
     .OfType<HealthCheckAnnotation>()
@@ -131,6 +139,13 @@ keycloak.WithSampleRealmImport(keycloakRealmName, keycloakRealmDisplayName, [
         webAppClientName,
         null,
         webApp
+    ),
+    new KeycloakClientDetails(
+        "WEB_API",
+        webApiClientId,
+        webApiClientName,
+        webApiClientSecret,
+        basket
     )
 ]);
 keycloak
@@ -151,11 +166,25 @@ var apiPortal = builder
 
 apiPortal
     .WithEnvironment("Keycloak__Realm", keycloakRealmName)
-    .WithEnvironment("Keycloak__ClientId", webAppClientId)
+    .WithEnvironment("Keycloak__ClientId", webApiClientId)
+    .WithEnvironment("Keycloak__ClientSecret", webApiClientSecret)
     .WithEnvironment("Keycloak__DefaultUser__Username", testUserUsername)
     .WithEnvironment("Keycloak__DefaultUser__Password", testUserPassword);
 
 apiPortal.WithEnvironment(context =>
+{
+    var httpsEndpoint = keycloak.GetEndpoint("https");
+    var authority = httpsEndpoint.Url;
+    context.EnvironmentVariables["Keycloak__Authority"] = authority.TrimEnd('/');
+});
+
+basket
+    .WithEnvironment("Keycloak__Realm", keycloakRealmName)
+    .WithEnvironment("Keycloak__ClientId", webApiClientId)
+    .WithEnvironment("Keycloak__ClientSecret", webApiClientSecret)
+    .WithEnvironment("Keycloak__Audience", webApiClientId);
+
+basket.WithEnvironment(context =>
 {
     var httpsEndpoint = keycloak.GetEndpoint("https");
     var authority = httpsEndpoint.Url;

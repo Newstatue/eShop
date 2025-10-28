@@ -72,6 +72,8 @@ public static class KeycloakExtensions
             .WithRealmImport("realms", isReadOnly: true)
             .WithEnvironment("REALM_NAME", realmName)
             .WithEnvironment("REALM_DISPLAY_NAME", displayName)
+            // Allow importing to overwrite existing resources so repeated imports don't fail on duplicates.
+            .WithEnvironment("KC_SPI_EXPORT_IMPORT_SINGLE_FILE_STRATEGY", "OVERWRITE_EXISTING")
             // Ensure HSTS is not enabled in run mode to avoid browser caching issues when developing.
             // Workaround for https://github.com/keycloak/keycloak/issues/32366
             .WithEnvironment("REALM_HSTS",
