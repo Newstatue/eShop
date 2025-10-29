@@ -2,9 +2,7 @@ using System.Net.Security;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-
 using ApiPortal;
-
 
 using Microsoft.Extensions.Options;
 
@@ -14,9 +12,11 @@ builder.AddServiceDefaults();
 
 builder.Services.Configure<KeycloakOptions>(builder.Configuration.GetSection("Keycloak"));
 
+var catalogRestAddress = builder.Configuration["services:catalog:rest:0"] ?? "http://catalog:5206";
+
 builder.Services.AddHttpClient("catalog-openapi", client =>
     {
-        client.BaseAddress = new Uri("https+http://catalog");
+        client.BaseAddress = new Uri(catalogRestAddress);
     })
     .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
     {
@@ -28,7 +28,7 @@ builder.Services.AddHttpClient("catalog-openapi", client =>
 
 builder.Services.AddHttpClient("basket-openapi", client =>
     {
-        client.BaseAddress = new Uri("https+http://basket");
+        client.BaseAddress = new Uri("https//basket");
     })
     .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
     {
@@ -80,7 +80,8 @@ app.MapGet("/openapi/catalog.json", async (IHttpClientFactory factory) =>
     }
 
     return json is null
-        ? Results.Problem("Catalog OpenAPI is unavailable. Make sure the service is running and OpenAPI is enabled.", statusCode: StatusCodes.Status502BadGateway)
+        ? Results.Problem("Catalog OpenAPI is unavailable. Make sure the service is running and OpenAPI is enabled.",
+            statusCode: StatusCodes.Status502BadGateway)
         : Results.Content(json, "application/json");
 });
 
@@ -105,122 +106,123 @@ app.MapGet("/openapi/basket.json", async (IHttpClientFactory factory) =>
     }
 
     return json is null
-        ? Results.Problem("Basket OpenAPI is unavailable. Make sure the service is running and OpenAPI is enabled.", statusCode: StatusCodes.Status502BadGateway)
+        ? Results.Problem("Basket OpenAPI is unavailable. Make sure the service is running and OpenAPI is enabled.",
+            statusCode: StatusCodes.Status502BadGateway)
         : Results.Content(json, "application/json");
 });
 
 app.MapGet("/keycloak/config", (IOptions<KeycloakOptions> options) =>
-{
-    var value = options.Value;
-    if (string.IsNullOrWhiteSpace(value.Authority) || string.IsNullOrWhiteSpace(value.Realm))
     {
-        return Results.Problem("Keycloak configuration is missing. Check the environment variables injected by AppHost.", statusCode: StatusCodes.Status500InternalServerError);
-    }
-
-    return Results.Ok(new
-    {
-        value.Authority,
-        value.Realm,
-        value.ClientId,
-        TokenEndpoint = BuildTokenEndpoint(value),
-        DefaultUser = new
+        var value = options.Value;
+        if (string.IsNullOrWhiteSpace(value.Authority) || string.IsNullOrWhiteSpace(value.Realm))
         {
-            value.DefaultUser.Username,
-            HasPassword = !string.IsNullOrWhiteSpace(value.DefaultUser.Password)
+            return Results.Problem(
+                "Keycloak configuration is missing. Check the environment variables injected by AppHost.",
+                statusCode: StatusCodes.Status500InternalServerError);
         }
-    });
-})
-.WithTags("Keycloak");
 
-app.MapPost("/keycloak/token", async (KeycloakTokenRequest request, IOptions<KeycloakOptions> options, IHttpClientFactory factory) =>
-{
-    var value = options.Value;
-    if (string.IsNullOrWhiteSpace(value.Authority) || string.IsNullOrWhiteSpace(value.Realm))
-    {
-        return Results.Problem("Keycloak configuration is missing. Check the environment variables injected by AppHost.", statusCode: StatusCodes.Status500InternalServerError);
-    }
-
-    var grantType = string.IsNullOrWhiteSpace(request.GrantType) ? "password" : request.GrantType;
-    var username = string.IsNullOrWhiteSpace(request.Username) ? value.DefaultUser.Username : request.Username!;
-    var password = string.IsNullOrWhiteSpace(request.Password) ? value.DefaultUser.Password : request.Password!;
-    var clientId = string.IsNullOrWhiteSpace(request.ClientId) ? value.ClientId : request.ClientId!;
-    var clientSecret = string.IsNullOrWhiteSpace(request.ClientSecret) ? value.ClientSecret : request.ClientSecret;
-
-    if (string.IsNullOrWhiteSpace(clientId))
-    {
-        return Results.BadRequest(new { error = "client_id is required" });
-    }
-
-    if (grantType.Equals("password", StringComparison.OrdinalIgnoreCase))
-    {
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        return Results.Ok(new
         {
-            return Results.BadRequest(new { error = "username or password is missing" });
-        }
-    }
-    else if (grantType.Equals("refresh_token", StringComparison.OrdinalIgnoreCase))
-    {
-        if (string.IsNullOrWhiteSpace(request.RefreshToken))
+            value.Authority,
+            value.Realm,
+            value.ClientId,
+            TokenEndpoint = BuildTokenEndpoint(value),
+            DefaultUser = new
+            {
+                value.DefaultUser.Username, HasPassword = !string.IsNullOrWhiteSpace(value.DefaultUser.Password)
+            }
+        });
+    })
+    .WithTags("Keycloak");
+
+app.MapPost("/keycloak/token",
+        async (KeycloakTokenRequest request, IOptions<KeycloakOptions> options, IHttpClientFactory factory) =>
         {
-            return Results.BadRequest(new { error = "refresh_token is required" });
-        }
-    }
+            var value = options.Value;
+            if (string.IsNullOrWhiteSpace(value.Authority) || string.IsNullOrWhiteSpace(value.Realm))
+            {
+                return Results.Problem(
+                    "Keycloak configuration is missing. Check the environment variables injected by AppHost.",
+                    statusCode: StatusCodes.Status500InternalServerError);
+            }
 
-    var form = new Dictionary<string, string>
-    {
-        ["grant_type"] = grantType,
-        ["client_id"] = clientId
-    };
+            var grantType = string.IsNullOrWhiteSpace(request.GrantType) ? "password" : request.GrantType;
+            var username = string.IsNullOrWhiteSpace(request.Username) ? value.DefaultUser.Username : request.Username!;
+            var password = string.IsNullOrWhiteSpace(request.Password) ? value.DefaultUser.Password : request.Password!;
+            var clientId = string.IsNullOrWhiteSpace(request.ClientId) ? value.ClientId : request.ClientId!;
+            var clientSecret = string.IsNullOrWhiteSpace(request.ClientSecret)
+                ? value.ClientSecret
+                : request.ClientSecret;
 
-    if (!string.IsNullOrWhiteSpace(clientSecret))
-    {
-        form["client_secret"] = clientSecret;
-    }
+            if (string.IsNullOrWhiteSpace(clientId))
+            {
+                return Results.BadRequest(new { error = "client_id is required" });
+            }
 
-    if (!string.IsNullOrWhiteSpace(request.Scope))
-    {
-        form["scope"] = request.Scope!;
-    }
+            if (grantType.Equals("password", StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+                {
+                    return Results.BadRequest(new { error = "username or password is missing" });
+                }
+            }
+            else if (grantType.Equals("refresh_token", StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrWhiteSpace(request.RefreshToken))
+                {
+                    return Results.BadRequest(new { error = "refresh_token is required" });
+                }
+            }
 
-    if (grantType.Equals("password", StringComparison.OrdinalIgnoreCase))
-    {
-        form["username"] = username;
-        form["password"] = password;
-    }
-    else if (grantType.Equals("refresh_token", StringComparison.OrdinalIgnoreCase))
-    {
-        form["refresh_token"] = request.RefreshToken!;
-    }
+            var form = new Dictionary<string, string> { ["grant_type"] = grantType, ["client_id"] = clientId };
 
-    if (request.Extra is { Count: > 0 })
-    {
-        foreach (var pair in request.Extra.Where(pair => !string.IsNullOrWhiteSpace(pair.Key) && !string.IsNullOrWhiteSpace(pair.Value)))
-        {
-            form[pair.Key] = pair.Value;
-        }
-    }
+            if (!string.IsNullOrWhiteSpace(clientSecret))
+            {
+                form["client_secret"] = clientSecret;
+            }
 
-    var tokenEndpoint = BuildTokenEndpoint(value);
-    var client = factory.CreateClient("keycloak-token");
+            if (!string.IsNullOrWhiteSpace(request.Scope))
+            {
+                form["scope"] = request.Scope!;
+            }
 
-    using var content = new FormUrlEncodedContent(form);
-    using var response = await client.PostAsync(tokenEndpoint, content);
-    var body = await response.Content.ReadAsStringAsync();
+            if (grantType.Equals("password", StringComparison.OrdinalIgnoreCase))
+            {
+                form["username"] = username;
+                form["password"] = password;
+            }
+            else if (grantType.Equals("refresh_token", StringComparison.OrdinalIgnoreCase))
+            {
+                form["refresh_token"] = request.RefreshToken!;
+            }
 
-    if (!response.IsSuccessStatusCode)
-    {
-        logger.LogWarning("Keycloak token request failed: {StatusCode} - {Body}", response.StatusCode, body);
-        return Results.Json(new
-        {
-            error = "Keycloak token request failed",
-            status = (int)response.StatusCode,
-            response = body
-        }, statusCode: StatusCodes.Status502BadGateway);
-    }
+            if (request.Extra is { Count: > 0 })
+            {
+                foreach (var pair in request.Extra.Where(pair =>
+                             !string.IsNullOrWhiteSpace(pair.Key) && !string.IsNullOrWhiteSpace(pair.Value)))
+                {
+                    form[pair.Key] = pair.Value;
+                }
+            }
 
-    return Results.Content(body, "application/json");
-})
-.WithTags("Keycloak");
+            var tokenEndpoint = BuildTokenEndpoint(value);
+            var client = factory.CreateClient("keycloak-token");
+
+            using var content = new FormUrlEncodedContent(form);
+            using var response = await client.PostAsync(tokenEndpoint, content);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogWarning("Keycloak token request failed: {StatusCode} - {Body}", response.StatusCode, body);
+                return Results.Json(
+                    new { error = "Keycloak token request failed", status = (int)response.StatusCode, response = body },
+                    statusCode: StatusCodes.Status502BadGateway);
+            }
+
+            return Results.Content(body, "application/json");
+        })
+    .WithTags("Keycloak");
 
 app.MapGet("/openapi/keycloak.json", (IOptions<KeycloakOptions> options) =>
 {
@@ -251,12 +253,10 @@ static string BuildKeycloakOpenApi(KeycloakOptions options)
         {
             ["title"] = "Keycloak Helper API",
             ["version"] = "1.0.0",
-            ["description"] = "Helper endpoints for inspecting Keycloak configuration and testing token requests."
+            ["description"] =
+                "Helper endpoints for inspecting Keycloak configuration and testing token requests."
         },
-        ["servers"] = new JsonArray
-        {
-            new JsonObject { ["url"] = "/" }
-        }
+        ["servers"] = new JsonArray { new JsonObject { ["url"] = "/" } }
     };
 
     var paths = new JsonObject();
@@ -314,18 +314,11 @@ static string BuildKeycloakOpenApi(KeycloakOptions options)
     {
         ["securitySchemes"] = new JsonObject
         {
-            ["none"] = new JsonObject
-            {
-                ["type"] = "http",
-                ["scheme"] = "none"
-            }
+            ["none"] = new JsonObject { ["type"] = "http", ["scheme"] = "none" }
         }
     };
 
-    return doc.ToJsonString(new JsonSerializerOptions
-    {
-        WriteIndented = false
-    });
+    return doc.ToJsonString(new JsonSerializerOptions { WriteIndented = false });
 }
 
 static string EnsureBearerAuth(string json)
@@ -369,16 +362,10 @@ static string EnsureBearerAuth(string json)
 
     if (!hasBearerRequirement)
     {
-        securityArray.Add(new JsonObject
-        {
-            ["bearerAuth"] = new JsonArray()
-        });
+        securityArray.Add(new JsonObject { ["bearerAuth"] = new JsonArray() });
     }
 
-    return node.ToJsonString(new JsonSerializerOptions
-    {
-        WriteIndented = false
-    });
+    return node.ToJsonString(new JsonSerializerOptions { WriteIndented = false });
 }
 
 public sealed class KeycloakTokenRequest

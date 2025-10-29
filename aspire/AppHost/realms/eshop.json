@@ -1518,8 +1518,8 @@
     "smtpServer": {},
     "loginTheme": "keycloakify-starter",
     "accountTheme": "",
-    "adminTheme": "",
-    "emailTheme": "",
+    "adminTheme": "phasetwo.v2",
+    "emailTheme": "attributes",
     "eventsEnabled": false,
     "eventsListeners": [
         "jboss-logging",
@@ -1793,9 +1793,9 @@
     },
     "internationalizationEnabled": true,
     "supportedLocales": [
-        "zh-TW"
+        "zh-CN"
     ],
-    "defaultLocale": "zh-TW",
+    "defaultLocale": "zh-CN",
     "authenticationFlows": [
         {
             "id": "3ade60ac-4fe0-4cb2-997a-c3dee4e4e1fe",
@@ -2704,7 +2704,8 @@
         "clientSessionMaxLifespan": "0",
         "frontendUrl": "",
         "organizationsEnabled": "false",
-        "acr.loa.map": "{}"
+        "acr.loa.map": "{}",
+        "_providerConfig.ext-event-script.0": "{\"scriptName\":\"log-user-events\",\"scriptDescription\":\"Log basic Keycloak events\",\"scriptCode\":\"function onEvent(event){ LOG.info(event.type + '|' + realm.name + '|' + (user ? user.username : 'anonymous')); }\\nfunction onAdminEvent(event){ LOG.info(event.operationType + '|' + event.resourceType + '|' + realm.name); }\"}"
     },
     "keycloakVersion": "25.0.6",
     "userManagedAccessAllowed": false,
@@ -2731,11 +2732,6 @@
                     "temporary": false
                 }
             ],
-            "attributes": {
-                "locale": [
-                    "${TEST_USER_LOCALE}"
-                ]
-            },
             "requiredActions": [],
             "realmRoles": [
                 "default-roles-${REALM_NAME}"

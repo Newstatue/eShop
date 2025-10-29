@@ -16,9 +16,7 @@ var webAppClientId = builder
     .AddParameter("webapp-client-id");
 var webAppClientName = builder
     .AddParameter("webapp-client-name");
-// var webAppClientSecret = builder
-//     .AddParameter("webapp-client-secret", secret: true)
-//     .WithGeneratedDefault(new() { MinLength = 32, Special = false });
+
 
 var webApiClientId = builder
     .AddParameter("webapi-client-id");
@@ -34,6 +32,10 @@ var testUserEmail = builder
     .AddParameter("test-user-email");
 var testUserPassword = builder
     .AddParameter("test-user-password", secret: true);
+
+var webhookSecret = builder
+    .AddParameter("webhook-secret", secret: true)
+    .WithGeneratedDefault(new() { MinLength = 24, Special = false });
 
 
 //微服务
@@ -129,7 +131,6 @@ var webApp = builder
     .WaitFor(keycloak)
     .WithEnvironment("Authentication__Keycloak__Realm", keycloakRealmName)
     .WithEnvironment("Authentication__Schemes__OpenIdConnect__ClientId", webAppClientId)
-    // .WithEnvironment("Authentication__Schemes__OpenIdConnect__ClientSecret", webAppClientSecret)
     .PublishAsDockerFile();
 
 keycloak.WithSampleRealmImport(keycloakRealmName, keycloakRealmDisplayName, [
@@ -177,6 +178,21 @@ apiPortal.WithEnvironment(context =>
     var authority = httpsEndpoint.Url;
     context.EnvironmentVariables["Keycloak__Authority"] = authority.TrimEnd('/');
 });
+
+var webhook = builder
+    .AddProject<Projects.Webhook>("webhook")
+    .WithHttpsEndpoint(name: "https-webhook")
+    .WithExternalHttpEndpoints()
+    .WithReference(keycloak)
+    .WaitFor(keycloak);
+
+webhook
+    .WithEnvironment("Webhook__Secret", webhookSecret)
+    .WithEnvironment(context =>
+    {
+        var httpsEndpoint = webhook.GetEndpoint("https-webhook");
+        context.EnvironmentVariables["Webhook__PublicUrl"] = httpsEndpoint.Url;
+    });
 
 basket
     .WithEnvironment("Keycloak__Realm", keycloakRealmName)

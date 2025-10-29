@@ -7,7 +7,7 @@ public static class BasketEndpoints
         var group = app.MapGroup("/basket").WithTags("Basket");
 
         //GET通过用户名查询购物车
-        group.MapGet("/{userName}", async (string userName, BasketService service) =>
+        group.MapGet("/{userName}", async (string userName, IBasketService service) =>
             {
                 var shoppingCart = await service.GetBasketAsync(userName);
                 return shoppingCart is not null ? Results.Ok(shoppingCart) : Results.NotFound();
@@ -18,7 +18,7 @@ public static class BasketEndpoints
             .RequireAuthorization();
 
         //POST更新购物车
-        group.MapPost("/", async (ShoppingCart shoppingCart, BasketService service) =>
+        group.MapPost("/", async (ShoppingCart shoppingCart, IBasketService service) =>
             {
                 await service.UpdateBasketAsync(shoppingCart);
                 return Results.Created("GetBasket", shoppingCart);
@@ -28,7 +28,7 @@ public static class BasketEndpoints
             .RequireAuthorization();
         
         //DELETE通过用户名删除购物车
-        group.MapDelete("/{userName}", async (string userName, BasketService service) =>
+        group.MapDelete("/{userName}", async (string userName, IBasketService service) =>
             {
                 await service.DeleteBasketAsync(userName);
                 return Results.NoContent();

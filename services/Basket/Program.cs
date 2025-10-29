@@ -1,3 +1,5 @@
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,13 +7,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.AddServiceDefaults();
 builder.AddRedisDistributedCache(connectionName: "cache");
-builder.Services.AddScoped<BasketService>();
+builder.Services.AddScoped<IBasketRepository, RedisBasketRepository>();
+builder.Services.AddScoped<IBasketService, BasketService>();
 
-builder.Services.AddHttpClient<CatalogApiClient>(client =>
+var catalogGrpcAddress = builder.Configuration["services:catalog:grpc:0"] ?? "http://catalog:7150";
+builder.Services.AddGrpcClient<CatalogService.CatalogServiceClient>(options =>
 {
-    // Use the service name as the host name to leverage internal DNS in Docker
-    client.BaseAddress = new("https+http://catalog");
+    options.Address = new Uri(catalogGrpcAddress);
 });
+
+builder.Services.AddScoped<CatalogGrpcClient>();
 
 // Allow requests from the frontend running on localhost:3001 during development
 builder.Services.AddCors(options =>

@@ -32,7 +32,11 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<ProductAIService>();
 builder.Services.AddMassTransitWithAssemblies(Assembly.GetExecutingAssembly());
 
+builder.Services.AddGrpc();
+builder.Services.AddGrpcHealthChecks();
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -48,9 +52,11 @@ if (app.Environment.IsDevelopment())
     app.UseCors("AllowFrontendDev");
 }
 
-app.MapDefaultEndpoints();
-app.MapProductEndpoints();
+app.MapGrpcService<CatalogGrpcService>();
+app.MapGrpcHealthChecksService();
 
+app.MapProductEndpoints();
+app.MapDefaultEndpoints();
 app.UseHttpsRedirection();
 
 app.Run();

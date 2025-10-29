@@ -1,40 +1,42 @@
 namespace Basket.Services;
 
-public class BasketService(IDistributedCache cache, CatalogApiClient catalogApiClient)
+public class BasketService(IBasketRepository repository, CatalogGrpcClient catalogClient)
+    : IBasketService
 {
-    public async Task<ShoppingCart?> GetBasketAsync(string userName)
-    {
-        var basket = await cache.GetStringAsync(userName);
-        return string.IsNullOrEmpty(basket) ? null 
-            : JsonSerializer.Deserialize<ShoppingCart>(basket);
-    }
+    public Task<ShoppingCart?> GetBasketAsync(string userName) =>
+        repository.GetBasketAsync(userName);
 
     public async Task UpdateBasketAsync(ShoppingCart basket)
     {
         foreach (var item in basket.Items)
         {
-            var product = await catalogApiClient.GetProductByIdAsync(item.ProductId);
+            var product = await catalogClient.GetProductByIdAsync(item.ProductId);
             item.Price = product.Price;
             item.ProductName = product.Name;
         }
-        await cache.SetStringAsync(basket.UserName, JsonSerializer.Serialize(basket));
+
+        await repository.SaveBasketAsync(basket);
     }
 
-    public async Task DeleteBasketAsync(string userName)
-    {
-        await cache.RemoveAsync(userName);
-    }
+    public Task DeleteBasketAsync(string userName) =>
+        repository.DeleteBasketAsync(userName);
 
-    internal async Task UpdateBasketItemProductPrices(int productId, decimal newPrice)
+    public async Task UpdateBasketItemProductPrices(int productId, decimal newPrice)
     {
-        //TODO: 这里仅作演示，实际项目中应该遍历所有用户的每个购物车项
-        var basket = await GetBasketAsync("swn");
-        var item = basket!.Items.FirstOrDefault(item => item.ProductId == productId);
-        if (item is not null)
+        // TODO: 示例实现：目前仅更新用户名为 "swn" 的购物车
+        var basket = await repository.GetBasketAsync("swn");
+        if (basket is null)
         {
-            item.Price = newPrice;
-            await  cache.SetStringAsync(basket.UserName, JsonSerializer.Serialize(basket));
+            return;
         }
-        
+
+        var item = basket.Items.FirstOrDefault(item => item.ProductId == productId);
+        if (item is null)
+        {
+            return;
+        }
+
+        item.Price = newPrice;
+        await repository.SaveBasketAsync(basket);
     }
 }
