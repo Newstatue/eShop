@@ -26,6 +26,14 @@ var webApiClientSecret = builder
     .AddParameter("webapi-client-secret", secret: true)
     .WithGeneratedDefault(new() { MinLength = 32, Special = false });
 
+var webhookClientId = builder
+    .AddParameter("webhook-client-id");
+var webhookClientName = builder
+    .AddParameter("webhook-client-name");
+var webhookClientSecret = builder
+    .AddParameter("webhook-client-secret", secret: true)
+    .WithGeneratedDefault(new() { MinLength = 32, Special = false });
+
 var testUserUsername = builder
     .AddParameter("test-user-username");
 var testUserEmail = builder
@@ -133,29 +141,6 @@ var webApp = builder
     .WithEnvironment("Authentication__Schemes__OpenIdConnect__ClientId", webAppClientId)
     .PublishAsDockerFile();
 
-keycloak.WithSampleRealmImport(keycloakRealmName, keycloakRealmDisplayName, [
-    new KeycloakClientDetails(
-        "WEB_APP", // 用于 Realm JSON 的环境变量前缀
-        webAppClientId,
-        webAppClientName,
-        null,
-        webApp
-    ),
-    new KeycloakClientDetails(
-        "WEB_API",
-        webApiClientId,
-        webApiClientName,
-        webApiClientSecret,
-        basket
-    )
-]);
-keycloak
-    .WithEnvironment("TEST_USER_USERNAME", testUserUsername)
-    .WithEnvironment("TEST_USER_EMAIL", testUserEmail)
-    .WithEnvironment("TEST_USER_PASSWORD", testUserPassword)
-    .WithEnvironment("TEST_USER_LOCALE", "zh-CN")
-    .WithEnvironment("TEST_USER_CREATED_TIMESTAMP", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString());
-
 var apiPortal = builder
     .AddProject<Projects.ApiPortal>("apiportal")
     .WithHttpsEndpoint()
@@ -175,24 +160,76 @@ apiPortal
 apiPortal.WithEnvironment(context =>
 {
     var httpsEndpoint = keycloak.GetEndpoint("https");
-    var authority = httpsEndpoint.Url;
-    context.EnvironmentVariables["Keycloak__Authority"] = authority.TrimEnd('/');
+    context.EnvironmentVariables["Keycloak__Authority"] = httpsEndpoint.Url;
 });
 
 var webhook = builder
     .AddProject<Projects.Webhook>("webhook")
-    .WithHttpsEndpoint(name: "https-webhook")
+    .WithHttpEndpoint(name: "http-webhook", targetPort: 8080)
     .WithExternalHttpEndpoints()
     .WithReference(keycloak)
     .WaitFor(keycloak);
 
+var webhookHttpEndpoint = webhook.GetEndpoint("http-webhook");
+
 webhook
     .WithEnvironment("Webhook__Secret", webhookSecret)
-    .WithEnvironment(context =>
+    .WithEnvironment("Keycloak__Realm", keycloakRealmName)
+    .WithEnvironment("Keycloak__ClientId", webhookClientId)
+    .WithEnvironment("Keycloak__ClientSecret", webhookClientSecret);
+
+webhook.WithEnvironment(context =>
+{
+    var httpsEndpoint = keycloak.GetEndpoint("https");
+    context.EnvironmentVariables["Keycloak__BaseAddress"] = httpsEndpoint.Url;
+
+    var baseUrl = context.ExecutionContext.IsPublishMode
+        ? webhookHttpEndpoint.ToString()
+        : webhookHttpEndpoint.Url;
+
+    var callbackUri = new Uri(baseUrl, UriKind.Absolute);
+    var builder = new UriBuilder(callbackUri)
     {
-        var httpsEndpoint = webhook.GetEndpoint("https-webhook");
-        context.EnvironmentVariables["Webhook__PublicUrl"] = httpsEndpoint.Url;
-    });
+        Path = "/webhook/keycloak"
+    };
+
+    if (!context.ExecutionContext.IsPublishMode)
+    {
+        builder.Host = "host.docker.internal";
+    }
+
+    context.EnvironmentVariables["Webhook__CallbackUrl"] = builder.Uri.ToString();
+});
+
+
+keycloak.WithSampleRealmImport(keycloakRealmName, keycloakRealmDisplayName, [
+    new KeycloakClientDetails(
+        "WEB_APP", // 用于 Realm JSON 的环境变量前缀
+        webAppClientId,
+        webAppClientName,
+        null,
+        webApp
+    ),
+    new KeycloakClientDetails(
+        "WEB_API",
+        webApiClientId,
+        webApiClientName,
+        webApiClientSecret,
+        basket
+    ),
+    new KeycloakClientDetails(
+        "WEBHOOK",
+        webhookClientId,
+        webhookClientName,
+        webhookClientSecret,
+        webhook
+    )
+]);
+keycloak
+    .WithEnvironment("TEST_USER_USERNAME", testUserUsername)
+    .WithEnvironment("TEST_USER_EMAIL", testUserEmail)
+    .WithEnvironment("TEST_USER_PASSWORD", testUserPassword)
+    .WithEnvironment("TEST_USER_CREATED_TIMESTAMP", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString());
 
 basket
     .WithEnvironment("Keycloak__Realm", keycloakRealmName)
@@ -203,8 +240,7 @@ basket
 basket.WithEnvironment(context =>
 {
     var httpsEndpoint = keycloak.GetEndpoint("https");
-    var authority = httpsEndpoint.Url;
-    context.EnvironmentVariables["Keycloak__Authority"] = authority.TrimEnd('/');
+    context.EnvironmentVariables["Keycloak__Authority"] = httpsEndpoint.Url;
 });
 
 
