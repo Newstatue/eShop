@@ -1,5 +1,6 @@
 import {
   KeyboardEvent,
+  use,
   useCallback,
   useEffect,
   useMemo,
@@ -7,7 +8,7 @@ import {
   useState,
 } from "react";
 import ReactMarkdown from "react-markdown";
-import { Bot, Send, ShoppingCart, X } from "lucide-react";
+import { Bot, Send, ShoppingCart, User, X } from "lucide-react";
 
 import { useSupportProducts } from "../hooks/useProducts";
 
@@ -40,24 +41,19 @@ export interface AISupportProps {
 }
 
 const TEXT = {
-  initialMessage:
-    "\u4f60\u597d\uff0c\u6211\u662f AI \u52a9\u624b\uff0c\u6709\u4ec0\u4e48\u53ef\u4ee5\u5e2e\u4f60\uff1f",
-  spinner: "\u601d\u8003\u4e2d...",
-  cartTitle: "\u8d2d\u7269\u8f66",
-  assistantTitle: "AI \u52a9\u624b",
-  assistantSubtitle: "\u968f\u65f6\u4e3a\u4f60\u89e3\u7b54",
-  cartSubtitleLoggedIn:
-    "\u6700\u8fd1\u6dfb\u52a0\u7684\u5546\u54c1\u4f1a\u51fa\u73b0\u5728\u8fd9\u91cc",
-  cartSubtitleLoggedOut:
-    "\u767b\u5f55\u540e\u5373\u53ef\u67e5\u770b\u8d2d\u7269\u8f66",
-  cartPlaceholder:
-    "\u4f60\u7684\u8d2d\u7269\u8f66\u6682\u65f6\u4e3a\u7a7a\uff0c\u53bb\u770b\u770b\u5176\u4ed6\u597d\u7269\u5427\u3002",
-  cartHelper:
-    "\u6211\u4eec\u4f1a\u4e3a\u4f60\u63a8\u8350\u9002\u5408\u7684\u5546\u54c1\u642d\u914d\u3002",
-  cartLoginPrompt:
-    "\u8bf7\u5148\u767b\u5f55\u4ee5\u67e5\u770b\u8d2d\u7269\u8f66\u5185\u5bb9\u3002",
-  loginButton: "\u7acb\u5373\u767b\u5f55",
-  inputPlaceholder: "\u8bf7\u8f93\u5165\u95ee\u9898\u6216\u9700\u6c42...",
+  initialMessage: "你好，我是 AI 助手，有什么可以帮你？",
+  spinner: "思考中...",
+  cartTitle: "购物车",
+  assistantTitle: "AI 助手",
+  assistantSubtitle: "随时为你解答",
+  cartSubtitleLoggedIn: "最近添加的商品会出现在这里",
+  cartSubtitleLoggedOut: "登录后即可查看购物车",
+  cartPlaceholder: "你的购物车暂时为空，去看看其他好物吧。",
+  cartHelper: "我们会为你推荐适合的商品搭配。",
+  cartLoginPrompt: "请先登录以查看购物车内容。",
+  loginButton: "立即登录",
+  inputPlaceholder: "请输入问题或需求...",
+  userPageTitle: "用户中心",
 };
 
 const toCssSize = (
@@ -171,6 +167,15 @@ export default function AISupport({
         ),
         onClick: () => handleDockSelect("assistant"),
       },
+      {
+        title: TEXT.userPageTitle,
+        icon: (
+          <User className="h-5 w-5 text-neutral-600 dark:text-neutral-200" />
+        ),
+        onClick: () => {
+          window.location.href = "/user"; // ✅ 直接跳转用户页面
+        },
+      },
     ],
     [handleDockSelect],
   );
@@ -205,11 +210,10 @@ export default function AISupport({
               className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-sm shadow-sm ${
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-foreground"
-                }`}
+                className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-sm shadow-sm ${message.role === "user"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-foreground"
+                  }`}
               >
                 {message.role === "assistant" ? (
                   <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-1.5 prose-p:last:mb-0 prose-ul:my-1 prose-ul:ml-4 prose-ol:my-1 prose-ol:ml-4 prose-li:my-1 prose-strong:font-semibold prose-code:rounded prose-code:bg-muted-foreground/10 prose-code:px-1 prose-code:py-0.5">

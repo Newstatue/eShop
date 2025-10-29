@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\services\Basket\Basket.csproj" />
     <ProjectReference Include="..\..\services\Catalog\Catalog.csproj" />
+    <ProjectReference Include="..\..\services\IdentityData\IdentityData.csproj" />
     <ProjectReference Include="..\..\services\Webhook\Webhook.csproj" />
     <ProjectReference Include="..\ApiPortal\ApiPortal.csproj" />
   </ItemGroup>

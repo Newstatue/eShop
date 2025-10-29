@@ -56,6 +56,9 @@ var postgres = builder
 var catalogDb = postgres
     .AddDatabase("catalogdb");
 
+var identityDb = postgres
+    .AddDatabase("identitydb");
+
 var cache = builder
     .AddRedis("cache")
     .WithRedisInsight()
@@ -73,11 +76,9 @@ var keycloak = builder
     .WithImage("phasetwo/phasetwo-keycloak")
     .WithImageTag("25")
     .WithBindMount("./providers", "/opt/keycloak/providers")
-    // .WithDataVolume()
     .RunWithHttpsDevCertificate()
     .WithEnvironment("KEYCLOAK_ADMIN", keycloakAdminUser)
     .WithEnvironment("KEYCLOAK_ADMIN_PASSWORD", keycloakAdminPassword);
-// .WithLifetime(ContainerLifetime.Persistent);
 
 var managementHealthChecks = keycloak.Resource.Annotations
     .OfType<HealthCheckAnnotation>()
@@ -115,6 +116,13 @@ var catalog = builder
     .WaitFor(rabbitMq)
     .WaitFor(chat)
     .WaitFor(embedding);
+
+var identityData = builder
+    .AddProject<Projects.IdentityData>("identitydata")
+    .WithReference(identityDb)
+    .WithReference(rabbitMq)
+    .WaitFor(identityDb)
+    .WaitFor(rabbitMq);
 
 var basket = builder
     .AddProject<Projects.Basket>("basket")
@@ -168,7 +176,9 @@ var webhook = builder
     .WithHttpEndpoint(name: "http-webhook", targetPort: 8080)
     .WithExternalHttpEndpoints()
     .WithReference(keycloak)
-    .WaitFor(keycloak);
+    .WithReference(rabbitMq)
+    .WaitFor(keycloak)
+    .WaitFor(rabbitMq);
 
 var webhookHttpEndpoint = webhook.GetEndpoint("http-webhook");
 
@@ -187,18 +197,18 @@ webhook.WithEnvironment(context =>
         ? webhookHttpEndpoint.ToString()
         : webhookHttpEndpoint.Url;
 
+    if (string.IsNullOrWhiteSpace(baseUrl))
+        throw new InvalidOperationException("Webhook endpoint URL is not available.");
+
     var callbackUri = new Uri(baseUrl, UriKind.Absolute);
-    var builder = new UriBuilder(callbackUri)
-    {
-        Path = "/webhook/keycloak"
-    };
+    var uriBuilder = new UriBuilder(callbackUri) { Path = "/webhook/keycloak" };
 
     if (!context.ExecutionContext.IsPublishMode)
     {
-        builder.Host = "host.docker.internal";
+        uriBuilder.Host = "host.docker.internal";
     }
 
-    context.EnvironmentVariables["Webhook__CallbackUrl"] = builder.Uri.ToString();
+    context.EnvironmentVariables["Webhook__CallbackUrl"] = uriBuilder.Uri.ToString();
 });
 
 

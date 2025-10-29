@@ -1,0 +1,24 @@
+{
+  "time": 1761822435697,
+  "realmId": "4f76679d-ef29-4a59-bdf8-7d4e12fa0ff7",
+  "uid": "c72aa465-184a-41d9-a833-b90dd6b0a1a0",
+  "type": "access.LOGIN",
+  "authDetails": {
+    "realmId": "eshop",
+    "clientId": "webapp-client",
+    "userId": "ca2ea8a8-154d-4283-9cb6-9977ba721bd0",
+    "ipAddress": "172.19.0.1",
+    "username": "test1",
+    "sessionId": "b2fa4311-df2c-4123-975c-6beff54e0b35"
+  },
+  "details": {
+    "auth_method": "openid-connect",
+    "auth_type": "code",
+    "response_type": "code",
+    "redirect_uri": "https://localhost:57361/",
+    "consent": "no_consent_required",
+    "code_id": "b2fa4311-df2c-4123-975c-6beff54e0b35",
+    "username": "test1",
+    "response_mode": "fragment"
+  }
+}

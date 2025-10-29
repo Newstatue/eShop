@@ -6,6 +6,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Options;
 
 using Webhook.Models;
+using Webhook.Options;
 using Webhook.Services;
 
 namespace Webhook.Endpoints;

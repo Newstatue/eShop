@@ -6,10 +6,7 @@ sealed class LoggingWebhookEventProcessor(ILogger<LoggingWebhookEventProcessor> 
 {
     public Task ProcessAsync(KeycloakWebhookEvent webhookEvent, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("收到 Keycloak Webhook：事件={EventType}，用户={UserId}，Realm={Realm}",
-            webhookEvent.EventType, webhookEvent.UserId ?? "未知", webhookEvent.RealmId ?? "未知");
-
-        logger.LogInformation("Webhook 原始载荷：{Payload}", webhookEvent.RawPayload);
+        logger.LogInformation("收到 Keycloak Webhook 数据：{Payload}", webhookEvent);
 
         return Task.CompletedTask;
     }

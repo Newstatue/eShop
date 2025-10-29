@@ -1,8 +1,8 @@
 namespace ServiceDefaults.Messaging.Events;
 
-public class IntegrationEvent
+public abstract record IntegrationEvent
 {
-    public Guid EventId => Guid.NewGuid();
-    public DateTime OccuredOn => DateTime.UtcNow;
-    public string EventType => GetType().AssemblyQualifiedName!;
+    public Guid EventId { get; init; } = Guid.NewGuid();
+    public DateTime OccurredOn { get; init; } = DateTime.UtcNow;
+    public virtual string EventType => GetType().AssemblyQualifiedName!;
 }

@@ -13,7 +13,7 @@ export const {
 } = createReactOidc(async () => ({
   issuerUri,
   clientId: authConfig.clientId,
-  scopes: ["profile", "email", "offline_access"],
+  scopes: ["profile", "email"],
   BASE_URL: import.meta.env.BASE_URL,
   extraQueryParams: () => buildThemeQueryParams(),
 }));

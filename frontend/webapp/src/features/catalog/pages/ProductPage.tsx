@@ -2,7 +2,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useProductsList } from "../hooks/useProducts";
 import AISupport from "../components/AISupport";
 import SearchBar from "../components/Search";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Product } from "@/models/Product";
 import ExpandableCardGrid, {
     ExpandableCardItem,
@@ -10,16 +10,20 @@ import ExpandableCardGrid, {
 
 export default function ProductPage() {
     const { data: products, isLoading } = useProductsList();
-    const [displayed, setDisplayed] = useState<Product[]>([]);
+    const [displayed, setDisplayed] = useState<Product[] | undefined>(undefined);
 
     useEffect(() => {
-        if (products) {
+        if (Array.isArray(products)) {
             setDisplayed(products);
         }
     }, [products]);
 
+    const normalizedProducts = useMemo<Product[]>(() => {
+        return Array.isArray(displayed) ? displayed : [];
+    }, [displayed]);
+
     const productCards: ExpandableCardItem[] = useMemo(() => {
-        return (displayed ?? []).map((product) => {
+        return normalizedProducts.map((product) => {
             const rawSrc = product.imageUrl ?? "";
             const imageSrc =
                 rawSrc.startsWith("http") || rawSrc.startsWith("/")
@@ -50,7 +54,15 @@ export default function ProductPage() {
                 ),
             } satisfies ExpandableCardItem;
         });
-    }, [displayed]);
+    }, [normalizedProducts]);
+
+    const handleResults = useCallback((list: Product[]) => {
+        setDisplayed(Array.isArray(list) ? list : []);
+    }, []);
+
+    const handleClear = useCallback(() => {
+        setDisplayed(Array.isArray(products) ? products : []);
+    }, [products]);
 
     if (isLoading) {
         return (
@@ -63,8 +75,8 @@ export default function ProductPage() {
     return (
         <>
             <SearchBar
-                onResults={(list) => setDisplayed(list)}
-                onClear={() => setDisplayed(products ?? [])}
+                onResults={handleResults}
+                onClear={handleClear}
                 mode="ai"
             />
 

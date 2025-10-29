@@ -1,10 +1,10 @@
 namespace ServiceDefaults.Messaging.Events;
 
-public class ProductPriceChangedIntegrationEvent : IntegrationEvent
+public sealed record ProductPriceChangedIntegrationEvent : IntegrationEvent
 {
-    public int ProductId { get; set; } = default!;
-    public string Name { get; set; } = default!;
-    public string Description { get; set; } = default!;
-    public decimal Price { get; set; } = default!;
-    public string ImageUrl { get; set; } = default!;
+    public int ProductId { get; init; }
+    public string Name { get; init; } = default!;
+    public string Description { get; init; } = default!;
+    public decimal Price { get; init; }
+    public string ImageUrl { get; init; } = default!;
 }

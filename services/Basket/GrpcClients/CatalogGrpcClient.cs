@@ -1,5 +1,3 @@
-using Catalog.Grpc;
-
 namespace Basket.GrpcClients;
 
 public class CatalogGrpcClient(CatalogService.CatalogServiceClient client)
