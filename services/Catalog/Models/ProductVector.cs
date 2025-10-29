@@ -1,7 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-using Microsoft.Extensions.VectorData;
-
 namespace Catalog.Models;
 
 public class ProductVector
