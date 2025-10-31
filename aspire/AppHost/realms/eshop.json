@@ -2829,6 +2829,7 @@
     },
     "users": [
         {
+            "id": "3dd84bea-f505-402f-be94-bf0b1b3ac916",
             "username": "${TEST_USER_USERNAME}",
             "enabled": true,
             "createdTimestamp": "${TEST_USER_CREATED_TIMESTAMP}",

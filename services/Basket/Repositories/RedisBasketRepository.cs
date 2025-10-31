@@ -2,19 +2,19 @@ namespace Basket.Repositories;
 
 public class RedisBasketRepository(IDistributedCache cache) : IBasketRepository
 {
-    public async Task<ShoppingCart?> GetBasketAsync(string userName)
+    public async Task<ShoppingCart?> GetBasketAsync(string userId)
     {
-        var basket = await cache.GetStringAsync(userName);
+        var basket = await cache.GetStringAsync(userId);
         return string.IsNullOrEmpty(basket)
             ? null
             : JsonSerializer.Deserialize<ShoppingCart>(basket);
     }
 
     public async Task SaveBasketAsync(ShoppingCart basket) =>
-        await cache.SetStringAsync(basket.UserName, JsonSerializer.Serialize(basket));
+        await cache.SetStringAsync(basket.UserId, JsonSerializer.Serialize(basket));
 
-    public async Task DeleteBasketAsync(string userName)
+    public async Task DeleteBasketAsync(string userId)
     {
-        await cache.RemoveAsync(userName);
+        await cache.RemoveAsync(userId);
     }
 }

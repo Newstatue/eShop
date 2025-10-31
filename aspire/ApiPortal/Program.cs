@@ -12,7 +12,8 @@ builder.AddServiceDefaults();
 
 builder.Services.Configure<KeycloakOptions>(builder.Configuration.GetSection("Keycloak"));
 
-var catalogRestAddress = builder.Configuration["services:catalog:rest:0"] ?? "http://catalog:5206";
+var catalogRestAddress = builder.Configuration["services:catalog:https:0"]
+    ?? "https://catalog";
 
 builder.Services.AddHttpClient("catalog-openapi", client =>
     {
@@ -26,9 +27,12 @@ builder.Services.AddHttpClient("catalog-openapi", client =>
         }
     });
 
+var basketAddress = builder.Configuration["services:basket:https:0"]
+    ?? "https://basket";
+
 builder.Services.AddHttpClient("basket-openapi", client =>
     {
-        client.BaseAddress = new Uri("https//basket");
+        client.BaseAddress = new Uri(basketAddress);
     })
     .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
     {

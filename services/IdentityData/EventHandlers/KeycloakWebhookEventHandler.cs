@@ -16,19 +16,25 @@ public sealed class KeycloakWebhookEventHandler(
     public async Task Consume(ConsumeContext<KeycloakWebhookIntegrationEvent> context)
     {
         var evt = context.Message;
-        var type = evt.EventType.Trim().ToLowerInvariant();
+        var type = evt.EventType?.Trim().ToLowerInvariant();
+
+        if (string.IsNullOrEmpty(type))
+        {
+            logger.LogWarning("收到空的 Keycloak 事件类型");
+            return;
+        }
 
         switch (type)
         {
             // 注册事件
-            case "REGISTER":
-            case "access.REGISTER":
+            case "register":
+            case "access.register":
                 await userEventHandler.HandleRegisterAsync(evt);
                 break;
 
             // 登录事件
-            case "LOGIN":
-            case "access.LOGIN":
+            case "login":
+            case "access.login":
                 await userEventHandler.HandleLoginAsync(evt);
                 break;
 

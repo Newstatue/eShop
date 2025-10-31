@@ -1,40 +1,61 @@
+using System.Security.Claims;
+
 namespace Basket.Endpoints;
 
 public static class BasketEndpoints
 {
     public static void MapBasketEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/basket").WithTags("Basket");
+        var group = app.MapGroup("/basket").WithTags("Basket").RequireAuthorization();
 
-        //GET通过用户名查询购物车
-        group.MapGet("/{userName}", async (string userName, IBasketService service) =>
+        group.MapGet("/", async (ClaimsPrincipal user, IBasketService service) =>
             {
-                var shoppingCart = await service.GetBasketAsync(userName);
+                var userId = ResolveUserId(user);
+                if (userId is null)
+                {
+                    return Results.Unauthorized();
+                }
+
+                var shoppingCart = await service.GetBasketAsync(userId);
                 return shoppingCart is not null ? Results.Ok(shoppingCart) : Results.NotFound();
             })
             .WithName("GetBasket")
             .Produces<ShoppingCart>()
-            .Produces(404)
-            .RequireAuthorization();
+            .Produces(401)
+            .Produces(404);
 
-        //POST更新购物车
-        group.MapPost("/", async (ShoppingCart shoppingCart, IBasketService service) =>
+        group.MapPost("/", async (ClaimsPrincipal user, ShoppingCart shoppingCart, IBasketService service) =>
             {
+                var userId = ResolveUserId(user);
+                if (userId is null)
+                {
+                    return Results.Unauthorized();
+                }
+
+                shoppingCart.UserId = userId;
                 await service.UpdateBasketAsync(shoppingCart);
                 return Results.Created("GetBasket", shoppingCart);
             })
             .WithName("UpdateBasket")
             .Produces<ShoppingCart>(201)
-            .RequireAuthorization();
-        
-        //DELETE通过用户名删除购物车
-        group.MapDelete("/{userName}", async (string userName, IBasketService service) =>
+            .Produces(401);
+
+        group.MapDelete("/", async (ClaimsPrincipal user, IBasketService service) =>
             {
-                await service.DeleteBasketAsync(userName);
+                var userId = ResolveUserId(user);
+                if (userId is null)
+                {
+                    return Results.Unauthorized();
+                }
+
+                await service.DeleteBasketAsync(userId);
                 return Results.NoContent();
             })
             .WithName("DeleteBasket")
             .Produces(204)
-            .RequireAuthorization();
+            .Produces(401);
     }
+
+    private static string? ResolveUserId(ClaimsPrincipal user) =>
+        user.FindFirstValue(ClaimTypes.NameIdentifier);
 }

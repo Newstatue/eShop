@@ -1,5 +1,6 @@
 global using System.Text.Json;
 global using System.Reflection;
+global using System.Security.Claims;
 
 global using Basket.Models;
 global using Basket.GrpcClients;
@@ -16,4 +17,6 @@ global using MassTransit;
 
 global using ServiceDefaults.Messaging.Events;
 global using ServiceDefaults.Messaging;
+
+
 

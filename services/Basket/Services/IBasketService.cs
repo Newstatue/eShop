@@ -2,8 +2,8 @@ namespace Basket.Services;
 
 public interface IBasketService
 {
-    Task<ShoppingCart?> GetBasketAsync(string userName);
+    Task<ShoppingCart?> GetBasketAsync(string userId);
     Task UpdateBasketAsync(ShoppingCart basket);
-    Task DeleteBasketAsync(string userName);
+    Task DeleteBasketAsync(string userId);
     Task UpdateBasketItemProductPrices(int productId, decimal newPrice);
 }

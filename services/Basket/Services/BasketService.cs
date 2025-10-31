@@ -3,8 +3,8 @@ namespace Basket.Services;
 public class BasketService(IBasketRepository repository, CatalogGrpcClient catalogClient)
     : IBasketService
 {
-    public Task<ShoppingCart?> GetBasketAsync(string userName) =>
-        repository.GetBasketAsync(userName);
+    public Task<ShoppingCart?> GetBasketAsync(string userId) =>
+        repository.GetBasketAsync(userId);
 
     public async Task UpdateBasketAsync(ShoppingCart basket)
     {
@@ -18,12 +18,12 @@ public class BasketService(IBasketRepository repository, CatalogGrpcClient catal
         await repository.SaveBasketAsync(basket);
     }
 
-    public Task DeleteBasketAsync(string userName) =>
-        repository.DeleteBasketAsync(userName);
+    public Task DeleteBasketAsync(string userId) =>
+        repository.DeleteBasketAsync(userId);
 
     public async Task UpdateBasketItemProductPrices(int productId, decimal newPrice)
     {
-        // TODO: 示例实现：目前仅更新用户名为 "swn" 的购物车
+        // TODO: 示例实现：目前仅更新用户 ID 为 "swn" 的购物车
         var basket = await repository.GetBasketAsync("swn");
         if (basket is null)
         {
