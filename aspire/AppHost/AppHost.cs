@@ -49,9 +49,9 @@ var webhookSecret = builder
 //微服务
 var postgres = builder
     .AddPostgres("postgres")
-    .WithPgAdmin()
-    .WithDataVolume()
-    .WithLifetime(ContainerLifetime.Persistent);
+    .WithPgAdmin();
+// .WithDataVolume()
+// .WithLifetime(ContainerLifetime.Persistent);
 
 var catalogDb = postgres
     .AddDatabase("catalogdb");
@@ -61,15 +61,15 @@ var identityDb = postgres
 
 var cache = builder
     .AddRedis("cache")
-    .WithRedisInsight()
-    .WithDataVolume()
-    .WithLifetime(ContainerLifetime.Persistent);
+    .WithRedisInsight();
+// .WithDataVolume();
+// .WithLifetime(ContainerLifetime.Persistent);
 
 var rabbitMq = builder
     .AddRabbitMQ("rabbitmq")
-    .WithManagementPlugin()
-    .WithDataVolume()
-    .WithLifetime(ContainerLifetime.Persistent);
+    .WithManagementPlugin();
+// .WithDataVolume();
+// .WithLifetime(ContainerLifetime.Persistent);
 
 var keycloak = builder
     .AddKeycloak("keycloak")

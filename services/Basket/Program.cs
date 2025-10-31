@@ -10,10 +10,10 @@ builder.AddRedisDistributedCache(connectionName: "cache");
 builder.Services.AddScoped<IBasketRepository, RedisBasketRepository>();
 builder.Services.AddScoped<IBasketService, BasketService>();
 
-var catalogGrpcAddress = builder.Configuration["services:catalog:grpc:0"] ?? "http://catalog:7150";
+var catalogGrpcAddress = builder.Configuration["services:catalog:grpc:0"];
 builder.Services.AddGrpcClient<CatalogService.CatalogServiceClient>(options =>
 {
-    options.Address = new Uri(catalogGrpcAddress);
+    options.Address = new Uri(catalogGrpcAddress!);
 });
 
 builder.Services.AddScoped<CatalogGrpcClient>();
@@ -34,12 +34,12 @@ builder.Services.AddCors(options =>
 builder.Services.AddMassTransitWithAssemblies(Assembly.GetExecutingAssembly());
 
 var keycloakSection = builder.Configuration.GetSection("Keycloak");
-var keycloakRealm = keycloakSection.GetValue<string>("Realm") ?? "eshop";
+var keycloakRealm = keycloakSection.GetValue<string>("Realm");
 
 builder.Services.AddAuthentication()
     .AddKeycloakJwtBearer(
         serviceName: "keycloak",
-        realm: keycloakRealm,
+        realm: keycloakRealm!,
         configureOptions: options =>
         {
             options.RequireHttpsMetadata = false;
