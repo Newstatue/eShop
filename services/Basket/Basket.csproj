@@ -29,7 +29,19 @@
     <Compile Include="..\Catalog\Models\Product.cs">
       <Link>Models\Product.cs</Link>
     </Compile>
-    <Protobuf Include="Protos\catalog.proto" GrpcServices="Client" />
+    <Compile Include="..\Catalog\Models\ProductCategory.cs">
+      <Link>Models\ProductCategory.cs</Link>
+    </Compile>
+    <Compile Include="..\Catalog\Models\ProductTag.cs">
+      <Link>Models\ProductTag.cs</Link>
+    </Compile>
+    <Compile Include="..\Catalog\Models\ProductImage.cs">
+      <Link>Models\ProductImage.cs</Link>
+    </Compile>
+    <Compile Include="..\Catalog\Models\ProductVariant.cs">
+      <Link>Models\ProductVariant.cs</Link>
+    </Compile>
+    <Protobuf Include="..\Catalog\Protos\catalog.proto" Link="Protos\catalog.proto" GrpcServices="Client" />
   </ItemGroup>
 
 </Project>

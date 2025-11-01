@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Basket.Exceptions;
 
 namespace Basket.Endpoints;

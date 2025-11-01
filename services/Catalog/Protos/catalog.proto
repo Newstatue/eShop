@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option csharp_namespace = "Catalog.Grpc";
+
+service CatalogService {
+    rpc GetProductById (GetProductByIdRequest) returns (ProductReply);
+}
+
+message GetProductByIdRequest {
+    int32 id = 1;
+}
+
+message ProductReply {
+    int32 id = 1;
+    string name = 2;
+    string description = 3;
+    string brand = 4;
+    double display_price = 5;
+    string primary_image_url = 6;
+    repeated ProductVariantReply variants = 7;
+}
+
+message ProductVariantReply {
+    string sku = 1;
+    double price = 2;
+    int32 stock_quantity = 3;
+    string image_url = 4;
+    string color = 5;
+    string size = 6;
+    string material = 7;
+}

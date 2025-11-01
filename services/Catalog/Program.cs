@@ -18,6 +18,13 @@ builder.Services.AddCors(options =>
     });
 });
 
+
+var config = TypeAdapterConfig.GlobalSettings;
+config.Scan(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddSingleton(config);
+builder.Services.AddScoped<IMapper, ServiceMapper>();
+
+
 builder.AddOllamaApiClient("chat")
     .AddChatClient();
 

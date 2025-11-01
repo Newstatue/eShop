@@ -5,10 +5,11 @@ namespace Catalog.Models;
 public class ProductVector
 {
     [VectorStoreKey] public int Id { get; set; }
-    [VectorStoreData] public string Name { get; set; } = default!;
-    [VectorStoreData] public string Description { get; set; } = default!;
-    [VectorStoreData] public decimal Price { get; set; }
-    [VectorStoreData] public string ImageUrl { get; set; } = default!;
+    [VectorStoreData] public string Name { get; set; } = null!;
+    [VectorStoreData] public string Description { get; set; } = null!;
+    [VectorStoreData] public string Brand { get; set; } = null!;
+    [VectorStoreData] public decimal BasePrice { get; set; }
+    [VectorStoreData] public string? PrimaryImageUrl { get; set; }
 
     [NotMapped]
     [VectorStoreVector(

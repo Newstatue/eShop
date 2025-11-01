@@ -263,51 +263,52 @@ static string BuildKeycloakOpenApi(KeycloakOptions options)
         ["servers"] = new JsonArray { new JsonObject { ["url"] = "/" } }
     };
 
-    var paths = new JsonObject();
-
-    paths["/keycloak/config"] = new JsonObject
+    var paths = new JsonObject
     {
-        ["get"] = new JsonObject
+        ["/keycloak/config"] = new JsonObject
         {
-            ["tags"] = new JsonArray("Keycloak"),
-            ["summary"] = "Get Keycloak configuration",
-            ["responses"] = new JsonObject
+            ["get"] = new JsonObject
             {
-                ["200"] = new JsonObject { ["description"] = "Configuration returned" },
-                ["500"] = new JsonObject { ["description"] = "Configuration missing" }
-            }
-        }
-    };
-
-    paths["/keycloak/token"] = new JsonObject
-    {
-        ["post"] = new JsonObject
-        {
-            ["tags"] = new JsonArray("Keycloak"),
-            ["summary"] = "Request Keycloak access token",
-            ["requestBody"] = new JsonObject
-            {
-                ["required"] = true,
-                ["content"] = new JsonObject
+                ["tags"] = new JsonArray("Keycloak"),
+                ["summary"] = "Get Keycloak configuration",
+                ["responses"] = new JsonObject
                 {
-                    ["application/json"] = new JsonObject
+                    ["200"] = new JsonObject { ["description"] = "Configuration returned" },
+                    ["500"] = new JsonObject { ["description"] = "Configuration missing" }
+                }
+            }
+        },
+
+        ["/keycloak/token"] = new JsonObject
+        {
+            ["post"] = new JsonObject
+            {
+                ["tags"] = new JsonArray("Keycloak"),
+                ["summary"] = "Request Keycloak access token",
+                ["requestBody"] = new JsonObject
+                {
+                    ["required"] = true,
+                    ["content"] = new JsonObject
                     {
-                        ["example"] = new JsonObject
+                        ["application/json"] = new JsonObject
                         {
-                            ["grantType"] = "password",
-                            ["clientId"] = clientId,
-                            ["username"] = username,
-                            ["password"] = password,
-                            ["scope"] = "openid profile"
+                            ["example"] = new JsonObject
+                            {
+                                ["grantType"] = "password",
+                                ["clientId"] = clientId,
+                                ["username"] = username,
+                                ["password"] = password,
+                                ["scope"] = "openid profile"
+                            }
                         }
                     }
+                },
+                ["responses"] = new JsonObject
+                {
+                    ["200"] = new JsonObject { ["description"] = "Token returned" },
+                    ["400"] = new JsonObject { ["description"] = "Validation error" },
+                    ["502"] = new JsonObject { ["description"] = "Keycloak request failed" }
                 }
-            },
-            ["responses"] = new JsonObject
-            {
-                ["200"] = new JsonObject { ["description"] = "Token returned" },
-                ["400"] = new JsonObject { ["description"] = "Validation error" },
-                ["502"] = new JsonObject { ["description"] = "Keycloak request failed" }
             }
         }
     };
@@ -327,19 +328,19 @@ static string BuildKeycloakOpenApi(KeycloakOptions options)
 
 static string EnsureBearerAuth(string json)
 {
-    var node = JsonNode.Parse(json)?.AsObject() ?? new JsonObject();
+    var node = JsonNode.Parse(json)?.AsObject() ?? [];
 
     var components = node["components"] as JsonObject;
     if (components is null)
     {
-        components = new JsonObject();
+        components = [];
         node["components"] = components;
     }
 
     var securitySchemes = components["securitySchemes"] as JsonObject;
     if (securitySchemes is null)
     {
-        securitySchemes = new JsonObject();
+        securitySchemes = [];
         components["securitySchemes"] = securitySchemes;
     }
 
@@ -357,7 +358,7 @@ static string EnsureBearerAuth(string json)
     var securityArray = node["security"] as JsonArray;
     if (securityArray is null)
     {
-        securityArray = new JsonArray();
+        securityArray = [];
         node["security"] = securityArray;
     }
 

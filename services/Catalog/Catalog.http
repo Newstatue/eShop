@@ -1,4 +1,4 @@
-@Catalog_HostAddress = https://localhost:7149/products
+@Catalog_HostAddress = https://localhost:5206/products
 
 ### 获取全部产品
 GET {{Catalog_HostAddress}}/

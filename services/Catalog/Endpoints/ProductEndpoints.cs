@@ -7,40 +7,65 @@ public static class ProductEndpoints
         var group = app.MapGroup("/products").WithTags("Products");
 
         //GET查询所有商品
-        group.MapGet("/", async (ProductService service) =>
+        group.MapGet("/", async (ProductService service, IMapper mapper) =>
             {
                 var products = await service.GetProductsAsync();
-                return Results.Ok(products);
+                var response = mapper.Map<List<ProductResponse>>(products);
+                return Results.Ok(response);
             })
             .WithName("GetAllProducts")
-            .Produces<List<Product>>();
+            .Produces<List<ProductResponse>>();
 
         //GET通过ID查询单个商品
-        group.MapGet("/{id}", async (int id, ProductService service) =>
+        group.MapGet("/{id}", async (int id, ProductService service, IMapper mapper) =>
             {
                 var product = await service.GetProductByIdAsync(id);
-                return product is not null ? Results.Ok(product) : Results.NotFound();
+                if (product is null) return Results.NotFound();
+
+                var response = mapper.Map<ProductResponse>(product);
+                return Results.Ok(response);
             })
             .WithName("GetProductById")
-            .Produces<Product>()
+            .Produces<ProductResponse>()
             .Produces(404);
 
         //POST创建商品
-        group.MapPost("/", async (Product inputProduct, ProductService service) =>
+        group.MapPost("/", async (ProductUpsertRequest request, ProductService service, IMapper mapper) =>
             {
-                await service.CreateProductAsync(inputProduct);
-                return Results.Created($"/products/{inputProduct.Id}", inputProduct);
+                var product = mapper.Map<Product>(request);
+
+                try
+                {
+                    await service.CreateProductAsync(product);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return Results.BadRequest(new { error = ex.Message });
+                }
+
+                var response = mapper.Map<ProductResponse>(product);
+                return Results.Created($"/products/{response.Id}", response);
             })
             .WithName("CreateProduct")
-            .Produces<Product>(201);
+            .Produces<ProductResponse>(201);
 
         //PUT更新商品
-        group.MapPut("/{id}", async (int id, Product inputProduct, ProductService service) =>
+        group.MapPut("/{id}", async (int id, ProductUpsertRequest request, ProductService service, IMapper mapper) =>
             {
                 var updateProduct = await service.GetProductByIdAsync(id);
                 if (updateProduct is null) return Results.NotFound();
 
-                await service.UpdateProductAsync(updateProduct, inputProduct);
+                var inputProduct = mapper.Map<Product>(request);
+
+                try
+                {
+                    await service.UpdateProductAsync(updateProduct, inputProduct);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return Results.BadRequest(new { error = ex.Message });
+                }
+
                 return Results.NoContent();
             })
             .WithName("UpdateProduct")
@@ -69,21 +94,23 @@ public static class ProductEndpoints
             .Produces(200);
 
         //传统搜索
-        group.MapGet("search/{query}", async (string query, ProductService service) =>
+        group.MapGet("search/{query}", async (string query, ProductService service, IMapper mapper) =>
             {
                 var products = await service.SearchProductsAsync(query);
-                return Results.Ok(products);
+                var response = mapper.Map<List<ProductResponse>>(products);
+                return Results.Ok(response);
             })
             .WithName("SearchProducts")
-            .Produces<List<Product>>();
+            .Produces<List<ProductResponse>>();
 
         //AI搜索
-        group.MapGet("aisearch/{query}", async (string query, ProductAIService service) =>
+        group.MapGet("aisearch/{query}", async (string query, ProductAIService service, IMapper mapper) =>
             {
                 var products = await service.SearchProductsAsync(query);
-                return Results.Ok(products);
+                var response = mapper.Map<List<ProductResponse>>(products);
+                return Results.Ok(response);
             })
             .WithName("AIProductSearch")
-            .Produces<List<Product>>();
+            .Produces<List<ProductResponse>>();
     }
 }
