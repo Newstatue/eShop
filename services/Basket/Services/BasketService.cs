@@ -1,3 +1,5 @@
+using Basket.Exceptions;
+
 namespace Basket.Services;
 
 public class BasketService(IBasketRepository repository, CatalogGrpcClient catalogClient)
@@ -11,6 +13,11 @@ public class BasketService(IBasketRepository repository, CatalogGrpcClient catal
         foreach (var item in basket.Items)
         {
             var product = await catalogClient.GetProductByIdAsync(item.ProductId);
+            if (product is null)
+            {
+                throw new CatalogProductNotFoundException(item.ProductId);
+            }
+
             item.Price = product.Price;
             item.ProductName = product.Name;
         }

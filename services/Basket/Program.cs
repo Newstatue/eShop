@@ -10,7 +10,9 @@ builder.AddRedisDistributedCache(connectionName: "cache");
 builder.Services.AddScoped<IBasketRepository, RedisBasketRepository>();
 builder.Services.AddScoped<IBasketService, BasketService>();
 
-var catalogGrpcAddress = builder.Configuration["services:catalog:grpc:0"];
+var catalogGrpcAddress =
+    builder.Configuration["services:catalog:https:0"];
+
 builder.Services.AddGrpcClient<CatalogService.CatalogServiceClient>(options =>
 {
     options.Address = new Uri(catalogGrpcAddress!);

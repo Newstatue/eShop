@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Basket.Exceptions;
 
 namespace Basket.Endpoints;
 
@@ -33,12 +34,21 @@ public static class BasketEndpoints
                 }
 
                 shoppingCart.UserId = userId;
-                await service.UpdateBasketAsync(shoppingCart);
-                return Results.Created("GetBasket", shoppingCart);
+
+                try
+                {
+                    await service.UpdateBasketAsync(shoppingCart);
+                    return Results.Created("GetBasket", shoppingCart);
+                }
+                catch (CatalogProductNotFoundException ex)
+                {
+                    return Results.NotFound(new { ex.Message });
+                }
             })
             .WithName("UpdateBasket")
             .Produces<ShoppingCart>(201)
-            .Produces(401);
+            .Produces(401)
+            .Produces(404);
 
         group.MapDelete("/", async (ClaimsPrincipal user, IBasketService service) =>
             {
