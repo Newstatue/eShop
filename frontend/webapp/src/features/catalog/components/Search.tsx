@@ -4,12 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
 import { useAISearch, useSearch } from "../hooks/useProducts";
-import type { Product } from "@/models/Product";
+import { ProductResponse } from "../models/Product";
 
 type SearchMode = "normal" | "ai";
 
 export interface FloatingSearchProps {
-  onResults: (products: Product[]) => void;
+  onResults: (products: ProductResponse[]) => void;
   onClear?: () => void;
   mode?: SearchMode;
   placeholders?: string[];

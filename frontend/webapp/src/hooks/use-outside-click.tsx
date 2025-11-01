@@ -8,6 +8,15 @@ export const useOutsideClick = (
     const listener = (event: Event) => {
       // Ignore clicks that originate from inside the referenced element
       const targetNode = event.target as Node | null;
+      const composedPath =
+        typeof (event as unknown as { composedPath?: () => EventTarget[] }).composedPath ===
+        "function"
+          ? (event as unknown as { composedPath: () => EventTarget[] }).composedPath()
+          : undefined;
+
+      if (composedPath && ref.current && composedPath.includes(ref.current)) {
+        return;
+      }
 
       if (!ref.current || (targetNode && ref.current.contains(targetNode))) {
         return;

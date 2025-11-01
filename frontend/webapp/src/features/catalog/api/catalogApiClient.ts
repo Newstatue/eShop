@@ -1,19 +1,19 @@
 import axios from "axios";
 
-import { Product } from "../../../models/Product";
 import { apiConfig } from "../../../app/config/apiConfig";
+import { ProductResponse } from "../models/Product";
 
 const httpClient = axios.create({
     baseURL: apiConfig.catalogApiBaseUrl
 });
 
-export async function getProducts(): Promise<Product[]> {
-    const response = await httpClient.get<Product[]>('/products');
+export async function getProducts(): Promise<ProductResponse[]> {
+    const response = await httpClient.get<ProductResponse[]>('/products');
     return response.data;
 }
 
-export async function getProductById(id: number): Promise<Product> {
-    const response = await httpClient.get<Product>(`/products/${id}`);
+export async function getProductById(id: number): Promise<ProductResponse> {
+    const response = await httpClient.get<ProductResponse>(`/products/${id}`);
     return response.data;
 }
 
@@ -22,11 +22,11 @@ export async function supportProducts(query: string) {
     return response.data;
 }
 
-export async function searchProducts(query: string): Promise<Product[]> {
-    const response = await httpClient.get<Product[]>(`/products/search/${query}`);
+export async function searchProducts(query: string): Promise<ProductResponse[]> {
+    const response = await httpClient.get<ProductResponse[]>(`/products/search/${query}`);
     return response.data;
 }
-export async function aiSearchProducts(query: string): Promise<Product[]> {
-    const response = await httpClient.get<Product[]>(`/products/aisearch/${query}`);
+export async function aiSearchProducts(query: string): Promise<ProductResponse[]> {
+    const response = await httpClient.get<ProductResponse[]>(`/products/aisearch/${query}`);
     return response.data;
 }
