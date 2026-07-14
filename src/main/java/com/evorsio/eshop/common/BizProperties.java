@@ -25,6 +25,6 @@ public class BizProperties {
 
     @Data
     public static class Order {
-        private Integer cancelDelayLevel = 3;
+        private Integer cancelDelayLevel = 16;
     }
 }

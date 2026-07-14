@@ -1,4 +1,4 @@
-package com.evorsio.eshop.mapper;
+package com.evorsio.eshop.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.evorsio.eshop.domain.StockLog;

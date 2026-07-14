@@ -1,7 +1,9 @@
-package com.evorsio.eshop.mapper;
+package com.evorsio.eshop.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.evorsio.eshop.domain.StockLog;
+import com.evorsio.eshop.mapper.StockLogMapper;
+import com.evorsio.eshop.service.StockLogService;
 import org.springframework.stereotype.Service;
 
 /**

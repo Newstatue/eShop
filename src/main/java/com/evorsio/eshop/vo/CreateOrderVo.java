@@ -13,7 +13,7 @@ import java.util.List;
  * @since 2026/6/17
  */
 @Data
-public class CreatOrderVo {
+public class CreateOrderVo {
     @NotEmpty(message = "订单项不能为空")
     @Valid
     private List<OrderItemVo> items;

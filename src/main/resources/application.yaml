@@ -49,4 +49,4 @@ biz:
     expire: 300
     interval: 60
   order:
-    cancel-delay-level: 3
+    cancel-delay-level: 4

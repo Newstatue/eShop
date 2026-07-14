@@ -3,7 +3,7 @@ package com.evorsio.eshop.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.evorsio.eshop.domain.Order;
 import com.evorsio.eshop.domain.StockLog;
-import com.evorsio.eshop.vo.CreatOrderVo;
+import com.evorsio.eshop.vo.CreateOrderVo;
 import com.evorsio.eshop.vo.OrderVo;
 
 import java.util.List;
@@ -15,9 +15,9 @@ import java.util.List;
  */
 public interface OrderService extends IService<Order> {
 
-    OrderVo createOrder(CreatOrderVo vo);
+    OrderVo createOrder(CreateOrderVo vo);
 
-    OrderVo doCreateOrder(CreatOrderVo vo, Long userId, String orderNo, List<StockLog> stockLogs);
+    OrderVo doCreateOrder(CreateOrderVo vo, Long userId, String orderNo, List<StockLog> stockLogs);
 
     void payOrder(String orderNo);
 

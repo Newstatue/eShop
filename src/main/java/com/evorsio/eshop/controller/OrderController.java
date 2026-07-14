@@ -2,7 +2,7 @@ package com.evorsio.eshop.controller;
 
 import com.evorsio.eshop.common.R;
 import com.evorsio.eshop.service.OrderService;
-import com.evorsio.eshop.vo.CreatOrderVo;
+import com.evorsio.eshop.vo.CreateOrderVo;
 import com.evorsio.eshop.vo.OrderVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -19,7 +19,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/create")
-    public R<OrderVo> createOrder(@Validated @RequestBody CreatOrderVo vo) {
+    public R<OrderVo> createOrder(@Validated @RequestBody CreateOrderVo vo) {
         OrderVo o = orderService.createOrder(vo);
         return R.ok(o);
     }

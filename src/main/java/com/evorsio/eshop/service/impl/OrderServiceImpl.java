@@ -11,7 +11,7 @@ import com.evorsio.eshop.domain.*;
 import com.evorsio.eshop.mapper.*;
 import com.evorsio.eshop.service.OrderService;
 import com.evorsio.eshop.util.OrderUtil;
-import com.evorsio.eshop.vo.CreatOrderVo;
+import com.evorsio.eshop.vo.CreateOrderVo;
 import com.evorsio.eshop.vo.OrderVo;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +58,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
     private OrderService self;
 
     @Override
-    public OrderVo createOrder(CreatOrderVo vo) {
+    public OrderVo createOrder(CreateOrderVo vo) {
         long userId = StpUtil.getLoginIdAsLong();
         String orderNo = OrderUtil.generateOrderNo();
 
@@ -80,11 +80,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
 
         try {
             List<StockLog> stockLogs = new ArrayList<>();
-            List<CreatOrderVo.OrderItemVo> deducted = new ArrayList<>();
+            List<CreateOrderVo.OrderItemVo> deducted = new ArrayList<>();
 
             try {
                 // 2. lua原子扣减
-                for (CreatOrderVo.OrderItemVo item : vo.getItems()) {
+                for (CreateOrderVo.OrderItemVo item : vo.getItems()) {
                     String key = BizConstants.REDIS_KEY_SKU_STOCK_PREFIX + item.getSkuId();
 
                     @SuppressWarnings("unchecked")
@@ -123,7 +123,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
 
                 OrderVo result = self.doCreateOrder(vo, userId, orderNo, stockLogs);
 
-                // 订单提交发送延迟消息
+                // 3.订单提交发送延迟消息
                 mqTemplate.syncSend(
                         BizConstants.MQ_TOPIC_ORDER_CANCEL,
                         MessageBuilder.withPayload(orderNo).build(),
@@ -133,8 +133,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
 
                 return result;
             } catch (RuntimeException e) {
-                //回滚库存
-                for (CreatOrderVo.OrderItemVo item : deducted) {
+                // 4.下单失败回滚库存
+                for (CreateOrderVo.OrderItemVo item : deducted) {
                     redisTemplate.opsForValue().increment(
                             BizConstants.REDIS_KEY_SKU_STOCK_PREFIX + item.getSkuId(),
                             item.getQuantity()
@@ -151,11 +151,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public OrderVo doCreateOrder(CreatOrderVo vo, Long userId, String orderNo, List<StockLog> stockLogs) {
+    public OrderVo doCreateOrder(CreateOrderVo vo, Long userId, String orderNo, List<StockLog> stockLogs) {
         BigDecimal totalAmount = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
 
-        for (CreatOrderVo.OrderItemVo item : vo.getItems()) {
+        for (CreateOrderVo.OrderItemVo item : vo.getItems()) {
             Sku sku = skuMapper.selectById(item.getSkuId());
             Spu spu = spuMapper.selectById(sku.getSpuId());
 
